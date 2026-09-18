@@ -19,12 +19,14 @@ export class GameUI {
   private readonly restartButton: HTMLButtonElement;
   private readonly fullscreenButton: HTMLButtonElement;
   private readonly fullscreenStatus: HTMLElement;
+  private readonly muteButton: HTMLButtonElement;
   private readonly handleStart: () => void;
   private readonly handleRestart: () => void;
   private readonly handleRetry: () => void;
   private readonly handleFullscreen: () => void;
   private readonly handlePause: () => void;
   private readonly handleResume: () => void;
+  private readonly handleMute: () => void;
 
   public constructor(
     onStart: () => void,
@@ -33,6 +35,7 @@ export class GameUI {
     onFullscreen: () => void,
     onPause: () => void,
     onResume: () => void,
+    onMute: () => void,
   ) {
     this.scoreElement = this.requireElement<HTMLElement>('#score');
     this.livesElement = this.requireElement<HTMLElement>('#lives');
@@ -55,18 +58,21 @@ export class GameUI {
       this.requireElement<HTMLButtonElement>('#fullscreen-button');
     this.fullscreenStatus =
       this.requireElement<HTMLElement>('#fullscreen-status');
+    this.muteButton = this.requireElement<HTMLButtonElement>('#mute-button');
     this.handleStart = onStart;
     this.handleRestart = onRestart;
     this.handleRetry = onRetry;
     this.handleFullscreen = onFullscreen;
     this.handlePause = onPause;
     this.handleResume = onResume;
+    this.handleMute = onMute;
     this.startButton.addEventListener('click', this.handleStart);
     this.restartButton.addEventListener('click', this.handleRestart);
     this.retryButton.addEventListener('click', this.handleRetry);
     this.fullscreenButton.addEventListener('click', this.handleFullscreen);
     this.pauseButton.addEventListener('click', this.handlePause);
     this.resumeButton.addEventListener('click', this.handleResume);
+    this.muteButton.addEventListener('click', this.handleMute);
   }
 
   public render(snapshot: SessionSnapshot): void {
@@ -117,6 +123,11 @@ export class GameUI {
     this.fullscreenStatus.hidden = !state.errorMessage;
   }
 
+  public setMuted(muted: boolean): void {
+    this.muteButton.textContent = muted ? 'Sound off' : 'Sound on';
+    this.muteButton.setAttribute('aria-pressed', String(muted));
+  }
+
   public dispose(): void {
     this.startButton.removeEventListener('click', this.handleStart);
     this.restartButton.removeEventListener('click', this.handleRestart);
@@ -124,6 +135,7 @@ export class GameUI {
     this.fullscreenButton.removeEventListener('click', this.handleFullscreen);
     this.pauseButton.removeEventListener('click', this.handlePause);
     this.resumeButton.removeEventListener('click', this.handleResume);
+    this.muteButton.removeEventListener('click', this.handleMute);
   }
 
   private requireElement<TElement extends Element>(selector: string): TElement {

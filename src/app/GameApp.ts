@@ -6,6 +6,7 @@ import { InputController } from '../input/InputController';
 import { GameView } from '../rendering/GameView';
 import { FullscreenState, GameViewport } from '../rendering/GameViewport';
 import { GameUI } from '../ui/GameUI';
+import { GameAudio } from '../audio/GameAudio';
 
 export class GameApp {
   private readonly pixiApp: Application<HTMLCanvasElement>;
@@ -15,6 +16,7 @@ export class GameApp {
   private view: GameView | null = null;
   private readonly ui: GameUI;
   private readonly viewport: GameViewport;
+  private readonly audio: GameAudio;
   private readonly tick: () => void;
   private readonly handleVisibilityChange: () => void;
   private started: boolean = false;
@@ -34,6 +36,7 @@ export class GameApp {
     this.session = new GameSession();
     this.input = new InputController();
     this.assets = new GameAssets();
+    this.audio = new GameAudio();
     this.ui = new GameUI(
       (): void => this.handleStart(),
       (): void => this.handleRestart(),
@@ -41,6 +44,7 @@ export class GameApp {
       (): void => void this.viewport.toggleFullscreen(),
       (): void => this.handlePause(),
       (): void => this.handleResume(),
+      (): void => this.handleMute(),
     );
     this.viewport = new GameViewport(
       this.pixiApp,
@@ -87,6 +91,7 @@ export class GameApp {
     this.view?.dispose();
     this.view = null;
     void this.assets.unload();
+    void this.audio.dispose();
     this.pixiApp.destroy(true);
   }
 
@@ -118,7 +123,9 @@ export class GameApp {
 
     this.skipNextUpdate = true;
     this.session.start();
+    void this.audio.unlock();
     this.input.clear();
+    this.view.resetFeedback();
     this.view.resetBackground();
     this.render();
   }
@@ -130,9 +137,16 @@ export class GameApp {
 
     this.skipNextUpdate = true;
     this.session.restart();
+    void this.audio.unlock();
     this.input.clear();
+    this.view.resetFeedback();
     this.view.resetBackground();
     this.render();
+  }
+
+  private handleMute(): void {
+    this.audio.setMuted(!this.audio.isMuted());
+    this.ui.setMuted(this.audio.isMuted());
   }
 
   private update(dtSeconds: number): void {
@@ -148,8 +162,11 @@ export class GameApp {
     );
     const snapshot: SessionSnapshot = this.session.getSnapshot();
 
+    this.audio.handle(events);
+    this.view?.handleEvents(events);
     if (snapshot.state === 'playing') {
       this.view?.advanceBackground(dtSeconds);
+      this.view?.advanceEffects(dtSeconds);
     }
 
     if (events.length > 0 || snapshot.state === 'playing') {
@@ -181,7 +198,12 @@ export class GameApp {
       }
 
       this.view?.dispose();
-      this.view = new GameView(this.pixiApp, assets);
+      this.view = new GameView(
+        this.pixiApp,
+        assets,
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ??
+          false,
+      );
       this.assetsReady = true;
       this.render();
       this.ui.showReady();

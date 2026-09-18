@@ -19,9 +19,9 @@ If npm differs, select npm `8.11.0` within the required Node environment. Keep d
 
 ## Current implementation
 
-Snapshot: 2026-09-18. `package.json`, `package-lock.json`, `.nvmrc`, and `tsconfig.json` are authoritative for exact configuration.
+Snapshot: 2026-09-19. `package.json`, `package-lock.json`, `.nvmrc`, and `tsconfig.json` are authoritative for exact configuration.
 
-T03 provides a framework-free PixiJS application with a DOM-independent gameplay model, keyboard input, preloaded supplied character/food sprites, directional horizontal animation, recoverable loading UI, and HTML start/HUD/game-over controls. T04a adds a viewport-sized canvas, contain-fitted logical board, density capped at 2, responsive HTML controls, and optional fullscreen. T05 adds pause/resume, a stage HUD, configurable endless catch-based stages, and shape-distinct hazards; each falling item retains its spawn speed. Pointer/touch movement is deferred to T04b after T07; its need will be reassessed then (D19). Jest runs deterministic model tests under Node; browser verification remains necessary for PixiJS, DOM, assets, animation, and input integration.
+T03 provides a framework-free PixiJS application with a DOM-independent gameplay model, keyboard input, preloaded supplied character/food sprites, directional horizontal animation, recoverable loading UI, and HTML start/HUD/game-over controls. T04a adds a viewport-sized canvas, contain-fitted logical board, density capped at 2, responsive HTML controls, and optional fullscreen. T05 adds pause/resume, a stage HUD, configurable endless catch-based stages, and shape-distinct hazards; each falling item retains its spawn speed. T06 adds event-driven visual feedback, cycling atmosphere and optional synthesized Web Audio cues with mute. Pointer/touch movement is deferred to T04b after T07; its need will be reassessed then (D19). Jest runs deterministic model and boundary tests under Node; browser verification remains necessary for PixiJS, DOM, assets, animation, audio, and input integration.
 
 | Technology | Current version | Purpose |
 | --- | --- | --- |
@@ -52,7 +52,7 @@ The lint configuration is rooted in this project and enforces explicit types for
 
 - Character PNGs: `public/assets/characters/`.
 - Food PNGs: `public/assets/food/` (64 individual items plus a combined sheet).
-- Audio destination: `public/assets/audio/` (no effects added yet).
+- Audio is synthesized at runtime with Web Audio; no audio files are distributed.
 - Attribution and source URLs: [SOURCES.md](../public/assets/SOURCES.md).
 - Original food documentation: [readme.txt](../public/assets/food/readme.txt).
 
@@ -69,4 +69,4 @@ Files under `public/` are served from the site root; for example `/assets/food/A
 
 ## Testing boundary
 
-Keep automated unit tests focused on the pure gameplay model and use browser checks for rendering and interaction. T02 introduced deterministic gameplay tests; T03 review added body-hitbox regression coverage. T04a adds layout and fullscreen-controller boundary tests without requiring WebGL or a DOM test package. T05 adds stage/hazard rules and application visibility/ticker integration tests using boundary doubles. There are 24 tests in five suites. T01 verified the configured Jest runner on the required runtime.
+Keep automated unit tests focused on the pure gameplay model and browser-boundary behavior that can be tested without WebGL. Use browser checks for rendering and interaction. T02 introduced deterministic gameplay tests; T03 review added body-hitbox regression coverage. T04a adds layout and fullscreen-controller boundary tests without requiring WebGL or a DOM test package. T05 adds stage/hazard rules and application visibility/ticker integration tests using boundary doubles. T06 adds background-cycle and optional-audio fallback coverage. The current suite contains 33 tests in seven suites. The latest recorded results are in [tasks.md](tasks.md); T01 verified the configured Jest runner on the required runtime.

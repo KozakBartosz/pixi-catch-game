@@ -1,13 +1,13 @@
 import { StageProgressionConfig, StageSettings } from './types';
 
 export const DEFAULT_STAGE_PROGRESSION: StageProgressionConfig = {
-  catchesPerStage: 10,
-  baseFallSpeed: 100,
-  fallSpeedIncrease: 1,
+  catchesPerStage: 5,
+  baseFallSpeed: 210,
+  fallSpeedIncrease: 30,
   maximumFallSpeed: 420,
-  baseSpawnInterval: 1.5,
+  baseSpawnInterval: 0.8,
   spawnIntervalDecrease: 0.05,
-  minimumSpawnInterval: 0.8,
+  minimumSpawnInterval: 0.4,
   baseHazardChance: 0,
   hazardChanceIncrease: 0.05,
   maximumHazardChance: 0.35,

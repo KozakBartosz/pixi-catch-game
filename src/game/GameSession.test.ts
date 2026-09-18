@@ -174,6 +174,8 @@ describe('GameSession', (): void => {
       type: 'itemCaught',
       itemId: 1,
       score: 1,
+      x: 400,
+      y: 444,
     });
     expect(session.getSnapshot().score).toBe(1);
     expect(session.getSnapshot().items).toHaveLength(0);
@@ -306,6 +308,8 @@ describe('GameSession', (): void => {
       itemId: 1,
       lives: 9,
       cause: 'hazard',
+      x: 400,
+      y: 444,
     });
     expect(hitSession.update(0.1, IDLE_INPUT)).toHaveLength(0);
 

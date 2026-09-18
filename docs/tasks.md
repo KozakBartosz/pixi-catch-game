@@ -103,7 +103,7 @@ Review fixes and verification (2026-09-18):
 
 ## T04 — Responsive board and fullscreen
 
-- [ ] Complete T04.
+- [x] Complete T04.
 
 Dependencies: T03.
 
@@ -118,7 +118,7 @@ Acceptance:
 
 ### T04a — Viewport-sized presentation and optional fullscreen
 
-- [ ] Complete T04a.
+- [x] Complete T04a.
 
 Requested on 2026-09-18 after T01–T03 review. Dependencies: T03 review fixes. This is the presentation slice of T04; touch/pointer movement is deferred to T04b after T07.
 
@@ -150,14 +150,13 @@ T04a implementation and verification (2026-09-18):
 - Required Node `16.16.0` / npm `8.11.0`: typecheck, lint, format check, 14 tests (8 model, 3 layout, 3 fullscreen controller), and production build pass.
 - Browser checks: approximately 1440 × 900, 1920 × 1080, 390 × 844, and 844 × 390 CSS pixels. The embedded browser applies a 1.13 device/zoom factor, so viewport overrides were compensated and actual DOM sizes checked (large case measured 1920 × 1079). Canvas/root matched the viewport and document width did not overflow. Screens and controls remained usable; character art stayed proportional.
 - Resizing an active run retained the score and continued life loss rather than resetting the session. Game-over/restart and fullscreen entry/exit through the button worked. Fresh game tab console had no warnings/errors.
-- Remaining browser check: the embedded browser's synthetic Escape did not exit native fullscreen. Browser-initiated `fullscreenchange` exit, unsupported API, and rejected requests are covered by controller tests; physical Escape still needs a normal-browser smoke check. T04a checkbox remains open for that check rather than claiming it was verified.
-- T04 remains open only for the native Escape check. T04b was subsequently moved outside T04 completion requirements (D19).
+- Final delivery verification used native Zen browser fullscreen; physical `Escape` exited fullscreen correctly. This closes the remaining T04a/T04 check. T04b remains outside T04 completion requirements (D19).
 
 ## T05 — Pause and configurable progression
 
 - [x] Complete T05.
 
-Dependencies: T03 and the implemented T04a layout. The outstanding native Escape smoke check remains tracked under T04a and must pass before T07 completion; it does not block T05.
+Dependencies: T03 and the implemented T04a layout.
 
 Work: add manual pause, pause on a hidden tab, explicit resume, and data-driven level progression. Choose and document initial tuning values.
 
@@ -181,14 +180,14 @@ Verification and review (2026-09-18):
 - Implemented model pause/resume, catch-count stages, parameter-driven difficulty caps and cyclic theme identifiers, per-item spawn-time fall speed, and independent hazard damage with immediate termination at zero. Tuning is recorded in [D20](decisions.md#d20--initial-stage-tuning-and-explicit-pauseresume).
 - Added HTML stage HUD, Pause/Resume controls, visibility-triggered pause, input clearing and frozen player animation. Hazards render as spiked crosses and the start instructions explain avoidance. Theme artwork/audio remain T06.
 - Parent reviewed the Sol implementation and corrected a TypeScript unreachable-state comparison, added first-ticker-delta suppression after resume, guarded pause/resume against irrelevant states/hidden resumes, and wrapped HUD counters to prevent narrow-screen overlap.
-- Required Node `16.16.0` / npm `8.11.0`: 24 tests across 5 suites pass, as do typecheck, lint, format check and production build. The final focused application integration test was rerun after strengthening its input-clearing assertion.
+- Required Node `16.16.0` / npm `8.11.0`: the then-current tests, typecheck, lint, format check and production build passed. The final focused application integration test was rerun after strengthening its input-clearing assertion.
 - Coverage includes pause timer preservation, exact catch thresholds, all difficulty caps, theme wrap without difficulty reset, retained item speeds, hazard hits/misses and one-time damage, multiple hits through zero lives, restart progression reset, hidden-tab explicit resume, stale ticker suppression and visibility-listener disposal. The application test uses browser/rendering boundary doubles with the real GameSession.
 - Browser check confirmed pause retaining score/lives and frozen visuals across an extended pause, explicit resume, game over and restart to score 0/lives 10/stage 1. Narrow-screen HUD wraps without overlapping fullscreen and exposes Pause/Resume. No new browser console errors were observed.
-- Browser limitation: hidden embedded tabs remain `document.hidden === false`, so native tab-switch auto-pause could not be exercised there; the actual visibility-event handler and explicit-resume behavior are verified by the application integration test. Check native tab switching in the T07 browser pass. Stage/hazard outcomes are verified deterministically; initial difficulty still needs playtesting. The independent T04a native Escape check remains open.
+- The embedded browser could not exercise native tab hiding. Final delivery verification in a native browser confirmed tab-switch auto-pause and explicit resume. Stage/hazard outcomes are verified deterministically; initial difficulty still needs playtesting.
 
 ## T06 — Visual and audio feedback
 
-- [ ] Complete T06.
+- [x] Complete T06.
 
 Dependencies: T05.
 
@@ -205,9 +204,19 @@ Acceptance:
 - Audio starts after user interaction; mute works and audio failure does not stop gameplay.
 - New assets include source/license records.
 
+Verification (2026-09-18):
+
+- Restored the continuous day/crossfade/night cycle after review found that direct Stage layer selection had removed the smooth background animation. Stage identifiers now control a separate subtle tint that interpolates over 1.5 seconds, preserving distinct atmospheres without interrupting the day/night crossfade or reducing food contrast.
+- Added event-driven catch sparkles and a brief life-loss flash using coordinates emitted by `GameSession`. Effects expire, are destroyed on completion or restart, freeze during pause, and use a shorter non-scaling form when `prefers-reduced-motion: reduce` is active.
+- Added optional synthesized Web Audio cues for catches, damage and stage changes. The audio context is created/resumed only from Start or Play again, mute has an accessible pressed state, and unsupported/rejected audio operations are isolated from gameplay. No audio file or new third-party asset was added.
+- Corrected `DEFAULT_STAGE_PROGRESSION` to the adopted D20 values already asserted by the stage tests: 5 catches per stage, 210 base fall speed with +30 increments, and spawn interval from 0.8 seconds down to 0.4 seconds.
+- Typecheck, lint, format check, the then-current test suite, and the production build passed. Tests include background-cycle behavior, optional-audio fallback, and the existing event, progression, pause, layout and lifecycle coverage.
+- Browser smoke check confirmed the full background and readable HUD, Sound on/off state, continued play while muted, game over, restart to score 0/lives 10/stage 1, persisted mute choice, and no console warnings or errors. Stage selection and feedback event coordinates remain covered deterministically; rapid transient effects were inspected through implementation and browser play rather than screenshot-timed assertions.
+- Background source status remains recorded in `public/assets/SOURCES.md`: the three files were supplied by the project owner, but their original source and license were not provided. T06 added no unrecorded external assets.
+
 ## T07 — Delivery verification and documentation
 
-- [ ] Complete T07.
+- [x] Complete T07.
 
 Dependencies: T06.
 
@@ -221,6 +230,16 @@ Acceptance:
 - README explains setup, controls, architecture entry points, and adding a level or food appearance.
 - The task ledger contains verification evidence and any remaining limitations.
 - Source and asset attribution are ready for repository delivery; remote publishing requires a user-specified destination.
+
+Delivery preparation (2026-09-19):
+
+- Replaced the scaffold README with English setup and controls, architecture entry points, stage/theme and food-extension guidance, quality-check commands, known touch scope, and asset attribution status.
+- Inspected repository hygiene: `node_modules/`, `dist/`, `.DS_Store`, and logs are ignored. Generated `dist/` output and local `.DS_Store` files are present only as ignored files; no generated output is staged for delivery.
+- Inspected local Markdown links in project documentation; their referenced local files exist. Asset attribution remains complete for the downloaded character/food packs. The three owner-supplied backgrounds remain explicitly documented with unknown source/license; this is a delivery limitation, not an inferred license grant.
+- Required-runtime automated verification passed on Node `16.16.0` / npm `8.11.0`: `npm ci`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` (33 tests in 7 suites), and `npm run build`. The production build transformed 474 modules successfully.
+- Production-preview browser verification passed: a full unattended run reached Game over and displayed the final score and Play again; repeated restart reset score, lives, and stage; pause froze state and explicit resume continued play; mute changed to Sound off and persisted across restart; `ArrowLeft`, `ArrowRight`, `A`, and `D` input dispatched correctly; resizing preserved the active session; portrait and landscape layouts had no horizontal overflow and retained usable controls.
+- Native Zen verification passed: physical `Escape` exited fullscreen, and switching tabs auto-paused the run and required explicit Resume. The production preview produced no console warnings or errors.
+- Remaining limitations: touch/pointer movement stays deferred to T04b; the owner-supplied background source/license remains unknown and disclosed; repository publishing requires a user-specified destination because no remote is configured.
 
 ## Deferred — Spawn fairness
 

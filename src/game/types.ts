@@ -35,12 +35,20 @@ export interface SessionSnapshot {
 }
 
 export type GameplayEvent =
-  | { type: 'itemCaught'; itemId: number; score: number }
+  | {
+      type: 'itemCaught';
+      itemId: number;
+      score: number;
+      x: number;
+      y: number;
+    }
   | {
       type: 'lifeLost';
       itemId: number;
       lives: number;
       cause: 'missedFood' | 'hazard';
+      x: number;
+      y: number;
     }
   | { type: 'stageChanged'; stage: number; themeId: string }
   | { type: 'gameOver'; score: number };

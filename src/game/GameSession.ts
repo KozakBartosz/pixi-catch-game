@@ -154,9 +154,11 @@ export class GameSession {
           type: 'itemCaught',
           itemId: item.id,
           score: this.score,
+          x: item.x + item.width / 2,
+          y: item.y + item.height / 2,
         });
         this.advanceStage(events);
-      } else if (this.loseLife(item.id, 'hazard', events)) {
+      } else if (this.loseLife(item, 'hazard', events)) {
         this.items = [];
         return;
       }
@@ -172,7 +174,7 @@ export class GameSession {
         unresolvedItems.push(item);
       } else if (
         item.kind === 'food' &&
-        this.loseLife(item.id, 'missedFood', events)
+        this.loseLife(item, 'missedFood', events)
       ) {
         this.items = [];
         return;
@@ -233,12 +235,19 @@ export class GameSession {
   }
 
   private loseLife(
-    itemId: number,
+    item: FallingItemState,
     cause: 'missedFood' | 'hazard',
     events: GameplayEvent[],
   ): boolean {
     this.lives = Math.max(0, this.lives - 1);
-    events.push({ type: 'lifeLost', itemId, lives: this.lives, cause });
+    events.push({
+      type: 'lifeLost',
+      itemId: item.id,
+      lives: this.lives,
+      cause,
+      x: item.x + item.width / 2,
+      y: Math.min(this.config.boardHeight, item.y + item.height / 2),
+    });
     if (this.lives > 0) {
       return false;
     }

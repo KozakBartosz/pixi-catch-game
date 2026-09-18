@@ -1,6 +1,6 @@
 # Catch Game implementation plan
 
-Status: in progress. T05 provides pause/resume, catch-based stages, bounded difficulty and hazards on top of supplied art and viewport-sized presentation. T06 adds themed visual/audio feedback. Native Escape (T04a) and native tab-visibility smoke checks remain for the delivery pass; touch is deferred until after T07.
+Status: T01–T07 complete. The delivered game includes supplied art, viewport-sized presentation, pause/resume, catch-based stages, bounded difficulty, hazards, and themed visual/audio feedback. Required-runtime automation and final native-browser checks passed. Touch/pointer movement remains deferred to T04b.
 
 Read [stack.md](stack.md) before choosing libraries or changing build configuration. Use [tasks.md](tasks.md) for implementation order and acceptance criteria.
 

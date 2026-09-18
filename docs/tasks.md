@@ -243,11 +243,13 @@ Delivery preparation (2026-09-19):
 
 ## Deferred — Spawn fairness
 
-- [ ] Revisit after playtesting; not required for T01–T07 completion.
+- [x] Reassessed after T07; implementation remains deferred pending playtest evidence.
 
 Context: D15 deliberately allows unconstrained random placement in the first version.
 
-Later work: evaluate minimum food/hazard separation, reaction time, and reachable catch/escape routes against actual movement speed and fall timing. Use observed unfair scenarios to choose constraints and add repeatable regression cases. Record the selected rules in the decision log before replacing the initial behavior.
+Review (2026-09-19): no repeatable unfair sequence was observed during delivery verification. The current maximum-speed timing gives roughly 1.09 seconds for an item's bottom to reach the player's top, compared with roughly 1.79 seconds for the player to cross its usable horizontal range. This alone does not identify a fair rule: committing to every spawn from any prior position is not a stated requirement, and minimum separation could make hazard avoidance trivial or bias the configured item distribution. A solver or retry-based spawner now would therefore be speculative complexity in the model's otherwise direct update pipeline.
+
+Implementation stays deferred. Reopen it only with recorded cases containing the random seed, stage, player position, active item positions/kinds, and the expected viable action. Then define measurable thresholds for reaction time, same-wave separation, or a reachable catch/escape route in [D15](decisions.md#d15--start-with-random-spawn-placement-defer-fairness-constraints). Acceptance requires deterministic regression cases for the observations, preserved in-bounds and seeded spawning, unchanged configured food availability, and no PixiJS, DOM, or input dependency in the model rule.
 
 ## T04b — Touch/pointer movement (deferred until after T07)
 

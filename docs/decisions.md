@@ -164,6 +164,10 @@ Reason: the user prefers to evaluate the simpler random version first and revisi
 
 Consequence: overlapping or unavoidably damaging combinations are an accepted first-version limitation. This does not bypass board bounds, item lifecycle rules, or deterministic randomness in tests. Track reaction-time, separation, and reachable-route constraints as follow-up work rather than a release prerequisite.
 
+Review (2026-09-19): keep this decision for the recruitment delivery. Final browser verification found no repeatable unfair sequence, and no playtest evidence establishes what separation or reaction-time rule would improve the game. At the maximum configured fall speed, an item's bottom takes about 1.09 seconds to reach the player's top, while the player takes about 1.79 seconds to cross its usable horizontal range. That mismatch is not sufficient evidence of a defect: choosing a position is part of the game, and a spawn-placement solver would introduce policy, tuning values, and model complexity not required by the assignment.
+
+Reopen only from recorded playtest evidence. Capture the random seed, stage, player position, active item positions and kinds, plus the expected viable action for every reported unfair case. Before implementation, define the rule in measurable terms and add it to this decision log. A fairness change is acceptable only when deterministic regressions reproduce each recorded case, ordinary seeded spawning remains deterministic and in bounds, food remains available at the configured probability, and the model rule can be explained without presentation or input dependencies. Candidate measurements are spawn-to-player reaction time, same-wave horizontal separation, and whether the player's speed permits at least one catch or escape route; their thresholds remain deliberately unset until playtesting supplies evidence.
+
 ## D16 — Apply damage per hazard without temporary protection
 
 Status: adopted; design interview concluded at the user's request.

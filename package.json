@@ -1,0 +1,37 @@
+{
+  "name": "pixi-catch-game",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint --ext .ts src",
+    "format": "prettier --write \"src/**/*.{ts,css}\" \"*.{json,js,cjs}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,css}\" \"*.{json,js,cjs}\"",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "pixi.js": "7.2.4"
+  },
+  "devDependencies": {
+    "@types/jest": "29.5.12",
+    "@types/node": "16.18.11",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "eslint": "8.57.1",
+    "jest": "29.7.0",
+    "prettier": "2.8.8",
+    "ts-jest": "29.1.2",
+    "typescript": "4.9.5",
+    "vite": "3.2.11"
+  },
+  "engines": {
+    "node": "16.16.0",
+    "npm": "8.11.0"
+  },
+  "overrides": {
+    "node-releases": "2.0.27"
+  }
+}

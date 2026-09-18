@@ -39,3 +39,24 @@ export const calculateBoardViewport: (
     offsetY: (safeViewportHeight - boardHeight * scale) / 2,
   };
 };
+
+export const mapViewportXToBoard: (
+  viewportX: number,
+  layout: BoardViewport,
+  clampToBoard?: boolean,
+) => number | null = (
+  viewportX: number,
+  layout: BoardViewport,
+  clampToBoard: boolean = false,
+): number | null => {
+  if (layout.scale <= 0) {
+    return null;
+  }
+
+  const boardX: number = (viewportX - layout.offsetX) / layout.scale;
+  if (clampToBoard) {
+    return Math.min(layout.boardWidth, Math.max(0, boardX));
+  }
+
+  return boardX >= 0 && boardX <= layout.boardWidth ? boardX : null;
+};

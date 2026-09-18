@@ -1,4 +1,8 @@
-import { BoardViewport, calculateBoardViewport } from './viewportLayout';
+import {
+  BoardViewport,
+  calculateBoardViewport,
+  mapViewportXToBoard,
+} from './viewportLayout';
 
 describe('calculateBoardViewport', (): void => {
   it('contain-fits and horizontally centers the board in a wide viewport', (): void => {
@@ -27,5 +31,22 @@ describe('calculateBoardViewport', (): void => {
     expect(layout.viewportHeight).toBe(0);
     expect(layout.offsetX).toBe(0);
     expect(layout.offsetY).toBe(0);
+  });
+
+  it('maps contained viewport coordinates and rejects decorative margins', (): void => {
+    const layout: BoardViewport = calculateBoardViewport(1920, 1080, 800, 600);
+
+    expect(mapViewportXToBoard(240, layout)).toBe(0);
+    expect(mapViewportXToBoard(960, layout)).toBe(400);
+    expect(mapViewportXToBoard(239, layout)).toBeNull();
+    expect(mapViewportXToBoard(1681, layout)).toBeNull();
+  });
+
+  it('clamps a captured drag to the logical board after resize', (): void => {
+    const portrait: BoardViewport = calculateBoardViewport(390, 844, 800, 600);
+
+    expect(mapViewportXToBoard(-20, portrait, true)).toBe(0);
+    expect(mapViewportXToBoard(410, portrait, true)).toBe(800);
+    expect(mapViewportXToBoard(195, portrait, true)).toBe(400);
   });
 });

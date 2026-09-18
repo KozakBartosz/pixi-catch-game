@@ -38,6 +38,32 @@ const createConfig: (overrides?: TestConfigOverrides) => GameConfig = (
 };
 
 describe('GameSession', (): void => {
+  it('moves toward a pointer target at player speed without overshooting', (): void => {
+    const session: GameSession = new GameSession();
+    session.start();
+    const initialX: number = session.getSnapshot().player.x;
+
+    session.update(0.1, { left: false, right: false, targetX: 700 });
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 42);
+
+    const centerX: number =
+      session.getSnapshot().player.x + session.getSnapshot().player.width / 2;
+    session.update(0.1, {
+      left: false,
+      right: false,
+      targetX: centerX + 2,
+    });
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 44);
+  });
+
+  it('gives explicit keyboard movement priority over an active pointer', (): void => {
+    const session: GameSession = new GameSession();
+    session.start();
+    const initialX: number = session.getSnapshot().player.x;
+
+    session.update(0.1, { left: true, right: false, targetX: 800 });
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX - 42);
+  });
   it('awards one point for a caught item and resolves it once', (): void => {
     const session: GameSession = new GameSession(
       createConfig({ initialSpawnDelay: 0, itemFallSpeed: 600 }),

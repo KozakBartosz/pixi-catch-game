@@ -208,6 +208,10 @@ Reason: touch support is not required by the assignment, and the user is unsure 
 
 Consequence: T04b no longer blocks T04 completion or T05–T07. T05 can use the implemented T04a layout while the native Escape smoke check remains open; that check must be completed before T07 closes. The fixed-board coordinate mapping design remains available for later touch support. Earlier scheduling of touch alongside responsive presentation is superseded by this decision.
 
+Post-delivery reassessment (2026-09-19): retain and implement T04b. The full-viewport game deliberately supports narrow portrait layouts, where keyboard-only movement is not credible. A pointer press must begin inside the rendered board; captured dragging may continue outside and clamps to board edges. The input controller converts the live viewport coordinate to a logical target, while `GameSession` owns speed-limited movement and bounds. Keyboard input takes priority while held. Pointer cancellation, capture loss, application input clearing, and window blur end pointer movement.
+
+Reason: this keeps browser geometry at the input boundary and gameplay motion in the DOM-independent model. Directly mutating player position from a pointer handler would couple presentation to simulation and make touch movement bypass speed and collision rules.
+
 ## D20 — Initial stage tuning and explicit pause/resume
 
 Status: adopted for T05; values remain subject to playtesting.

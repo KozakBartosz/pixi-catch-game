@@ -236,10 +236,10 @@ Delivery preparation (2026-09-19):
 - Replaced the scaffold README with English setup and controls, architecture entry points, stage/theme and food-extension guidance, quality-check commands, known touch scope, and asset attribution status.
 - Inspected repository hygiene: `node_modules/`, `dist/`, `.DS_Store`, and logs are ignored. Generated `dist/` output and local `.DS_Store` files are present only as ignored files; no generated output is staged for delivery.
 - Inspected local Markdown links in project documentation; their referenced local files exist. Asset attribution remains complete for the downloaded character/food packs. The three owner-supplied backgrounds remain explicitly documented with unknown source/license; this is a delivery limitation, not an inferred license grant.
-- Required-runtime automated verification passed on Node `16.16.0` / npm `8.11.0`: `npm ci`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` (33 tests in 7 suites), and `npm run build`. The production build transformed 474 modules successfully.
+- Required-runtime automated verification passed on Node `16.16.0` / npm `8.11.0`: `npm ci`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` (subsequently expanded to 40 tests in 8 suites by T04b), and `npm run build`. The latest production build transformed 474 modules successfully.
 - Production-preview browser verification passed: a full unattended run reached Game over and displayed the final score and Play again; repeated restart reset score, lives, and stage; pause froze state and explicit resume continued play; mute changed to Sound off and persisted across restart; `ArrowLeft`, `ArrowRight`, `A`, and `D` input dispatched correctly; resizing preserved the active session; portrait and landscape layouts had no horizontal overflow and retained usable controls.
 - Native Zen verification passed: physical `Escape` exited fullscreen, and switching tabs auto-paused the run and required explicit Resume. The production preview produced no console warnings or errors.
-- Remaining limitations: touch/pointer movement stays deferred to T04b; the owner-supplied background source/license remains unknown and disclosed; repository publishing requires a user-specified destination because no remote is configured.
+- Remaining limitations: the owner-supplied background source/license remains unknown and disclosed; repository publishing requires a user-specified destination because no remote is configured. T04b later closed the touch/pointer limitation.
 
 ## Deferred — Spawn fairness
 
@@ -253,10 +253,24 @@ Implementation stays deferred. Reopen it only with recorded cases containing the
 
 ## T04b — Touch/pointer movement (deferred until after T07)
 
-- [ ] Revisit T04b after T07; implementation need remains undecided.
+- [x] Complete T04b.
 
 Dependencies: T07 and T04a. Moved to the end at the user's request (D19). This task does not block T04, T05–T07, or keyboard-based delivery.
 
 If retained, map pointer coordinates through board scale/offsets into the shared input contract; handle cancellation, capture loss, and focus loss. Verify actual touch/pointer movement and resize mapping. Reassess whether touch is needed before implementation.
 
 Planning verification: task order, dependencies, and related plan/decision/stack references were checked for consistency; local Markdown links resolve. No implementation or completion status changed.
+
+Implementation (2026-09-19):
+
+- Retained T04b because the delivered viewport-responsive game is intended to remain usable on narrow touch screens; keyboard-only input would leave that presentation without a credible primary movement method.
+- Added single-pointer hold/drag input on the renderer canvas. A press must start inside the contain-fitted board; pointer capture keeps dragging coherent and out-of-board drags clamp to logical edges. Cancellation, pointer-up, capture loss, window blur, pause/start/restart clearing, and disposal remove the active target.
+- Added a typed optional logical `targetX` to the existing gameplay input contract. `GameSession` moves toward it at the configured player speed without overshoot or bypassing model bounds. Explicit keyboard direction takes priority over a simultaneous pointer target.
+- Coordinate conversion reads the current `GameViewport` layout on every pointer event, so resizing during a drag does not retain stale scale/offset values. The simulation remains independent of PixiJS and DOM APIs.
+- Added deterministic tests for coordinate mapping/margins/clamping, speed-limited target movement and keyboard priority, and pointer capture/cancel/capture-loss/blur/resize behavior. These checks were added but intentionally not run by the implementation agent; required-runtime automated and browser verification belongs to the reviewer.
+
+Reviewer verification (2026-09-19):
+
+- On Node `16.16.0` / npm `8.11.0`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` (40 tests in 8 suites), and `npm run build` passed. The production build transformed 474 modules.
+- Production-browser pointer press/drag moved the player through the speed-limited model path; releasing stopped target movement. HTML controls remained separate from canvas movement and the console stayed clean.
+- Deterministic tests cover pointer cancellation, capture loss, window blur, live resize mapping, board-margin rejection and edge clamping. Real touch hardware and an orientation change during a held drag were unavailable in the verification environment. This is a remaining device-coverage limitation, not a blocker for T04b.

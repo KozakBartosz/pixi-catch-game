@@ -34,7 +34,6 @@ export class GameApp {
       resolution: Math.min(window.devicePixelRatio || 1, 2),
     });
     this.session = new GameSession();
-    this.input = new InputController();
     this.assets = new GameAssets();
     this.audio = new GameAudio();
     this.ui = new GameUI(
@@ -52,6 +51,10 @@ export class GameApp {
       DEFAULT_GAME_CONFIG.boardWidth,
       DEFAULT_GAME_CONFIG.boardHeight,
       (state: FullscreenState): void => this.ui.setFullscreenState(state),
+    );
+    this.input = new InputController(
+      this.pixiApp.view,
+      (): ReturnType<GameViewport['getLayout']> => this.viewport.getLayout(),
     );
     this.tick = (): void => this.update(this.pixiApp.ticker.deltaMS / 1000);
     this.handleVisibilityChange = (): void => {

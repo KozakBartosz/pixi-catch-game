@@ -4,6 +4,8 @@ export type FallingItemKind = 'food' | 'hazard';
 export interface InputState {
   left: boolean;
   right: boolean;
+  /** Logical board x-coordinate requested by an active pointer. */
+  targetX?: number;
 }
 
 export interface PlayerState {

@@ -185,9 +185,20 @@ export class GameSession {
   }
 
   private movePlayer(dtSeconds: number, input: InputState): void {
-    const direction: number = Number(input.right) - Number(input.left);
-    const requestedX: number =
-      this.player.x + direction * this.config.playerSpeed * dtSeconds;
+    const keyboardDirection: number = Number(input.right) - Number(input.left);
+    const playerCenterX: number = this.player.x + this.player.width / 2;
+    const pointerDirection: number =
+      input.targetX === undefined
+        ? 0
+        : Math.sign(input.targetX - playerCenterX);
+    const direction: number =
+      keyboardDirection === 0 ? pointerDirection : keyboardDirection;
+    const maximumTravel: number = this.config.playerSpeed * dtSeconds;
+    const travel: number =
+      keyboardDirection === 0 && input.targetX !== undefined
+        ? Math.min(maximumTravel, Math.abs(input.targetX - playerCenterX))
+        : maximumTravel;
+    const requestedX: number = this.player.x + direction * travel;
     const maximumX: number = this.config.boardWidth - this.player.width;
     this.player.x = Math.min(maximumX, Math.max(0, requestedX));
   }

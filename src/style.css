@@ -37,6 +37,7 @@ canvas {
   height: 100%;
   display: block;
   image-rendering: pixelated;
+  touch-action: none;
 }
 
 .hud {

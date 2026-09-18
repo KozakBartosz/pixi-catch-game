@@ -26,12 +26,13 @@ npm start
 
 - Move left: `A` or `Left Arrow`
 - Move right: `D` or `Right Arrow`
+- Touch or pointer: press/hold on the board and drag horizontally
 - Start, pause, resume, restart, mute, and fullscreen: use the labelled HTML buttons; they are reachable by keyboard with `Tab` and activated with `Enter` or `Space`
 - Leave fullscreen: the `Exit fullscreen` button or the browser's `Escape` shortcut
 
 Switching away from the tab pauses an active run. Returning does not resume it automatically; select `Resume` when ready. Sound is optional, begins only after a start/restart interaction, and can be muted without affecting gameplay.
 
-Touch/pointer movement is not part of this delivery; see the deferred [T04b task](docs/tasks.md#t04b--touchpointer-movement-deferred-until-after-t07).
+Pointer input is translated through the current contain-fit viewport into logical board coordinates. Movement keeps the same model-owned speed and bounds as keyboard input, so resizing does not change gameplay.
 
 ## Quality checks
 
@@ -45,7 +46,7 @@ npm run build
 
 `npm run build` creates the ignored `dist/` directory. `npm run preview` serves that production build for browser verification. See [docs/tasks.md](docs/tasks.md) for recorded verification evidence and remaining limitations.
 
-Latest delivery verification passed on Node `16.16.0` and npm `8.11.0`: clean `npm ci`, typecheck, lint, format check, all 33 tests in 7 suites, and a production build of 474 modules. Production-preview and native-browser checks also passed; details are recorded in the task ledger.
+Latest delivery verification passed on Node `16.16.0` and npm `8.11.0`: clean `npm ci`, typecheck, lint, format check, all 40 tests in 8 suites, and a production build of 474 modules. Production-preview and native-browser checks also passed; details are recorded in the task ledger.
 
 ## Architecture
 

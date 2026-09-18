@@ -1,6 +1,6 @@
 # Catch Game implementation plan
 
-Status: T01–T07 complete. The delivered game includes supplied art, viewport-sized presentation, pause/resume, catch-based stages, bounded difficulty, hazards, and themed visual/audio feedback. Required-runtime automation and final native-browser checks passed. Touch/pointer movement remains deferred to T04b.
+Status: T01–T07 and T04b complete. The delivered game includes supplied art, viewport-sized keyboard/pointer play, pause/resume, catch-based stages, bounded difficulty, hazards, and themed visual/audio feedback. Required-runtime automation and production-browser pointer verification passed; real touch hardware coverage remains unavailable.
 
 Read [stack.md](stack.md) before choosing libraries or changing build configuration. Use [tasks.md](tasks.md) for implementation order and acceptance criteria.
 
@@ -61,7 +61,7 @@ Use a fixed logical board with a constant aspect ratio, scaled to available spac
 4. Add pause and configurable levels.
 5. Add background art, restrained catch/life-loss feedback, and optional sound with mute.
 6. Verify behavior, document extension points, and prepare reproducible delivery.
-7. Reassess deferred touch/pointer controls (T04b) after delivery verification.
+7. Add touch/pointer controls (T04b) after delivery verification established the keyboard baseline.
 
 Stages 1–3 cover the core game. Levels, visual polish, and sound are assignment bonuses included in the planned follow-up stages.
 

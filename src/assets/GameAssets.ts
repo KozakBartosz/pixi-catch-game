@@ -2,6 +2,9 @@ import { Assets, SCALE_MODES, Texture } from 'pixi.js';
 import { ASSET_MANIFEST, REQUIRED_ASSET_URLS } from './assetManifest';
 
 export interface LoadedGameAssets {
+  backgroundDay: Texture;
+  backgroundCrossfade: Texture;
+  backgroundNight: Texture;
   playerIdleLeft: Texture;
   playerIdleRight: Texture;
   playerRunLeft: Texture[];
@@ -37,6 +40,11 @@ export class GameAssets {
 
     try {
       const assets: LoadedGameAssets = {
+        backgroundDay: this.getTexture(ASSET_MANIFEST.backgrounds.day),
+        backgroundCrossfade: this.getTexture(
+          ASSET_MANIFEST.backgrounds.crossfade,
+        ),
+        backgroundNight: this.getTexture(ASSET_MANIFEST.backgrounds.night),
         playerIdleLeft: this.getTexture(ASSET_MANIFEST.player.idleLeft),
         playerIdleRight: this.getTexture(ASSET_MANIFEST.player.idleRight),
         playerRunLeft: this.getTextures(ASSET_MANIFEST.player.runLeft),
@@ -73,6 +81,9 @@ export class GameAssets {
 
   private setNearestScaleMode(assets: LoadedGameAssets): void {
     const textures: Texture[] = [
+      assets.backgroundDay,
+      assets.backgroundCrossfade,
+      assets.backgroundNight,
       assets.playerIdleLeft,
       assets.playerIdleRight,
       ...assets.playerRunLeft,

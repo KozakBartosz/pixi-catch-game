@@ -9,11 +9,14 @@ import {
 } from 'pixi.js';
 import { LoadedGameAssets } from '../assets/GameAssets';
 import { FallingItemState, SessionSnapshot, SessionState } from '../game/types';
+import { BackgroundOpacity, getBackgroundOpacity } from './backgroundCycle';
 
 export class GameView {
   private readonly app: Application<HTMLCanvasElement>;
   private readonly world: Container;
   private readonly assets: LoadedGameAssets;
+  private readonly crossfadeBackground: Sprite;
+  private readonly nightBackground: Sprite;
   private readonly playerSprite: AnimatedSprite;
   private readonly itemSprites: Map<number, DisplayObject> = new Map<
     number,
@@ -23,6 +26,7 @@ export class GameView {
   private lastSessionState: SessionState | null = null;
   private playerAnimation: 'idle' | 'left' | 'right' = 'idle';
   private lastFacing: 'left' | 'right' = 'right';
+  private backgroundElapsedSeconds: number = 0;
 
   public constructor(
     app: Application<HTMLCanvasElement>,
@@ -32,15 +36,40 @@ export class GameView {
     this.assets = assets;
     this.world = new Container();
     this.playerSprite = new AnimatedSprite([this.assets.playerIdleRight]);
-    const background: Graphics = new Graphics();
-    background.beginFill(0x172554);
-    background.drawRect(0, 0, 800, 600);
-    background.endFill();
+    const dayBackground: Sprite = this.createBackground(
+      this.assets.backgroundDay,
+    );
+    this.crossfadeBackground = this.createBackground(
+      this.assets.backgroundCrossfade,
+    );
+    this.nightBackground = this.createBackground(this.assets.backgroundNight);
+    this.crossfadeBackground.alpha = 0;
+    this.nightBackground.alpha = 0;
     this.playerSprite.anchor.set(0.5, 1);
     this.playerSprite.scale.set(1.5);
     this.playerSprite.animationSpeed = 0.12;
-    this.world.addChild(background, this.playerSprite);
+    this.world.addChild(
+      dayBackground,
+      this.crossfadeBackground,
+      this.nightBackground,
+      this.playerSprite,
+    );
     this.app.stage.addChild(this.world);
+  }
+
+  public advanceBackground(dtSeconds: number): void {
+    this.backgroundElapsedSeconds += Math.min(Math.max(dtSeconds, 0), 0.1);
+    const opacity: BackgroundOpacity = getBackgroundOpacity(
+      this.backgroundElapsedSeconds,
+    );
+    this.crossfadeBackground.alpha = opacity.crossfade;
+    this.nightBackground.alpha = opacity.night;
+  }
+
+  public resetBackground(): void {
+    this.backgroundElapsedSeconds = 0;
+    this.crossfadeBackground.alpha = 0;
+    this.nightBackground.alpha = 0;
   }
 
   public render(snapshot: SessionSnapshot): void {
@@ -64,6 +93,15 @@ export class GameView {
   public dispose(): void {
     this.itemSprites.clear();
     this.world.destroy({ children: true });
+  }
+
+  private createBackground(texture: Texture): Sprite {
+    const sprite: Sprite = new Sprite(texture);
+    const scale: number = Math.max(800 / texture.width, 600 / texture.height);
+    sprite.scale.set(scale);
+    sprite.anchor.set(0.5);
+    sprite.position.set(400, 300);
+    return sprite;
   }
 
   private renderItem(item: FallingItemState): void {

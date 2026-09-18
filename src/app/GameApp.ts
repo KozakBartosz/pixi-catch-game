@@ -119,6 +119,7 @@ export class GameApp {
     this.skipNextUpdate = true;
     this.session.start();
     this.input.clear();
+    this.view.resetBackground();
     this.render();
   }
 
@@ -130,6 +131,7 @@ export class GameApp {
     this.skipNextUpdate = true;
     this.session.restart();
     this.input.clear();
+    this.view.resetBackground();
     this.render();
   }
 
@@ -145,6 +147,10 @@ export class GameApp {
       this.input.getState(),
     );
     const snapshot: SessionSnapshot = this.session.getSnapshot();
+
+    if (snapshot.state === 'playing') {
+      this.view?.advanceBackground(dtSeconds);
+    }
 
     if (events.length > 0 || snapshot.state === 'playing') {
       this.render(snapshot);

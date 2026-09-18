@@ -1,4 +1,9 @@
 export interface AssetManifest {
+  backgrounds: {
+    day: string;
+    crossfade: string;
+    night: string;
+  };
   player: {
     idleLeft: string;
     idleRight: string;
@@ -9,6 +14,11 @@ export interface AssetManifest {
 }
 
 export const ASSET_MANIFEST: AssetManifest = {
+  backgrounds: {
+    day: '/assets/backgrounds/day.png',
+    crossfade: '/assets/backgrounds/crossfade.png',
+    night: '/assets/backgrounds/night.png',
+  },
   player: {
     idleLeft: '/assets/characters/knight iso char_idle_2.png',
     idleRight: '/assets/characters/knight iso char_idle_3.png',
@@ -39,6 +49,9 @@ export const ASSET_MANIFEST: AssetManifest = {
 };
 
 export const REQUIRED_ASSET_URLS: readonly string[] = [
+  ASSET_MANIFEST.backgrounds.day,
+  ASSET_MANIFEST.backgrounds.crossfade,
+  ASSET_MANIFEST.backgrounds.night,
   ASSET_MANIFEST.player.idleLeft,
   ASSET_MANIFEST.player.idleRight,
   ...ASSET_MANIFEST.player.runLeft,

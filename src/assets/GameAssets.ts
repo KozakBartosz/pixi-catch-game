@@ -66,9 +66,17 @@ export class GameAssets {
 
     const urls: string[] = [...this.loadedUrls];
     this.loadedUrls.clear();
-    await Promise.all(
-      urls.map(async (url: string): Promise<void> => Assets.unload(url)),
+    const results: PromiseSettledResult<void>[] = await Promise.allSettled(
+      urls.map((url: string): Promise<void> => Assets.unload(url)),
     );
+    for (const [index, result] of results.entries()) {
+      if (result.status === 'rejected') this.loadedUrls.add(urls[index]);
+    }
+    const failure: PromiseRejectedResult | undefined = results.find(
+      (result: PromiseSettledResult<void>): result is PromiseRejectedResult =>
+        result.status === 'rejected',
+    );
+    if (failure) throw failure.reason;
   }
 
   private getTextures(urls: readonly string[]): Texture[] {

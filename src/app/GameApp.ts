@@ -20,6 +20,8 @@ export class GameApp {
   private readonly tick: () => void;
   private readonly handleVisibilityChange: () => void;
   private started: boolean = false;
+  private disposed: boolean = false;
+  private loading: boolean = false;
   private assetsReady: boolean = false;
   private loadAttempt: number = 0;
   private skipNextUpdate: boolean = true;
@@ -36,21 +38,23 @@ export class GameApp {
     this.session = new GameSession();
     this.assets = new GameAssets();
     this.audio = new GameAudio();
-    this.ui = new GameUI(
-      (): void => this.handleStart(),
-      (): void => this.handleRestart(),
-      (): void => void this.loadAssets(),
-      (): void => void this.viewport.toggleFullscreen(),
-      (): void => this.handlePause(),
-      (): void => this.handleResume(),
-      (): void => this.handleMute(),
-    );
+    this.ui = new GameUI(root, {
+      start: (): void => this.handleStart(),
+      restart: (): void => this.handleRestart(),
+      retry: (): void => void this.loadAssets(),
+      fullscreen: (): void => void this.viewport.toggleFullscreen(),
+      pause: (): void => this.handlePause(),
+      resume: (): void => this.handleResume(),
+      mute: (): void => this.handleMute(),
+    });
     this.viewport = new GameViewport(
       this.pixiApp,
       root,
       DEFAULT_GAME_CONFIG.boardWidth,
       DEFAULT_GAME_CONFIG.boardHeight,
-      (state: FullscreenState): void => this.ui.setFullscreenState(state),
+      (state: FullscreenState): void => {
+        if (!this.disposed) this.ui.setFullscreenState(state);
+      },
     );
     this.input = new InputController(
       this.pixiApp.view,
@@ -68,7 +72,7 @@ export class GameApp {
   }
 
   public start(): void {
-    if (this.started) {
+    if (this.started || this.disposed) {
       return;
     }
 
@@ -78,10 +82,12 @@ export class GameApp {
   }
 
   public dispose(): void {
-    if (!this.started) {
+    if (this.disposed) {
       return;
     }
 
+    this.disposed = true;
+    this.loadAttempt++;
     this.started = false;
     this.pixiApp.ticker.remove(this.tick);
     this.input.dispose();
@@ -93,12 +99,15 @@ export class GameApp {
     );
     this.view?.dispose();
     this.view = null;
-    void this.assets.unload();
+    if (!this.loading) {
+      void this.unloadAssets();
+    }
     void this.audio.dispose();
     this.pixiApp.destroy(true);
   }
 
   private handlePause(): void {
+    if (this.disposed) return;
     if (this.session.getSnapshot().state !== 'playing') {
       return;
     }
@@ -109,6 +118,7 @@ export class GameApp {
   }
 
   private handleResume(): void {
+    if (this.disposed) return;
     if (document.hidden || this.session.getSnapshot().state !== 'paused') {
       return;
     }
@@ -120,6 +130,7 @@ export class GameApp {
   }
 
   private handleStart(): void {
+    if (this.disposed) return;
     if (!this.assetsReady || !this.view) {
       return;
     }
@@ -134,6 +145,7 @@ export class GameApp {
   }
 
   private handleRestart(): void {
+    if (this.disposed) return;
     if (!this.assetsReady || !this.view) {
       return;
     }
@@ -148,11 +160,13 @@ export class GameApp {
   }
 
   private handleMute(): void {
+    if (this.disposed) return;
     this.audio.setMuted(!this.audio.isMuted());
     this.ui.setMuted(this.audio.isMuted());
   }
 
   private update(dtSeconds: number): void {
+    if (this.disposed) return;
     // A resumed RAF may include time spent in a hidden/throttled tab.
     if (this.skipNextUpdate) {
       this.skipNextUpdate = false;
@@ -183,6 +197,8 @@ export class GameApp {
   }
 
   private async loadAssets(): Promise<void> {
+    if (this.disposed || this.loading) return;
+    this.loading = true;
     const attempt: number = ++this.loadAttempt;
     this.assetsReady = false;
     this.ui.showLoading(0);
@@ -190,13 +206,13 @@ export class GameApp {
     try {
       const assets: LoadedGameAssets = await this.assets.load(
         (progress: number): void => {
-          if (attempt === this.loadAttempt) {
+          if (!this.disposed && attempt === this.loadAttempt) {
             this.ui.showLoading(progress);
           }
         },
       );
 
-      if (!this.started || attempt !== this.loadAttempt) {
+      if (this.disposed || !this.started || attempt !== this.loadAttempt) {
         return;
       }
 
@@ -208,14 +224,25 @@ export class GameApp {
           false,
       );
       this.assetsReady = true;
-      this.render();
       this.ui.showReady();
+      this.render();
     } catch (error: unknown) {
-      if (attempt === this.loadAttempt) {
+      if (!this.disposed && attempt === this.loadAttempt) {
         this.assetsReady = false;
         console.error('Required game assets failed to load.', error);
         this.ui.showLoadError();
       }
+    } finally {
+      this.loading = false;
+      if (this.disposed) await this.unloadAssets();
+    }
+  }
+
+  private async unloadAssets(): Promise<void> {
+    try {
+      await this.assets.unload();
+    } catch (error: unknown) {
+      console.error('Game asset cleanup failed.', error);
     }
   }
 }

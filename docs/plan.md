@@ -47,7 +47,7 @@ Movement uses elapsed seconds. Bound unusually large time steps and use substeps
 
 ### State and lifecycle
 
-The intended states are `loading`, `ready`, `playing`, `paused`, `gameOver`, and a recoverable loading error. Application/UI owns loading; the session owns gameplay states. Restart restores score, lives, player position, items, timers, level, and input. Dispose removes listeners, ticker callbacks, and owned rendering resources without destroying shared textures prematurely.
+The intended states are `loading`, `ready`, `playing`, `paused`, `gameOver`, and a recoverable loading error. The HTML UI receives its root and named actions from the application; transitions focus the visible primary control and announce the final score once, as recorded in D22. Application/UI owns loading; the session owns gameplay states. Restart restores score, lives, player position, items, timers, stage, and input. One `GameApp` owns the global Pixi asset cache at a time. Disposal is permanent and safe from construction onward: it removes listeners, ticker callbacks, input, UI, viewport, audio, view, and renderer resources once; `start()` after disposal does nothing. An in-flight load settles before its acquired assets are unloaded, and late progress, success, and failure cannot revive the disposed app. A live app may retry a failed load; overlapping loads are ignored. The active view is disposed before its textures are unloaded.
 
 ### Responsive layout
 

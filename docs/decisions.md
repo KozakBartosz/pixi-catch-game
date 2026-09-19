@@ -223,3 +223,23 @@ Reason: stage 1 introduces food alone. Catch-based advancement increases speed, 
 Decision: provide HTML Pause/Resume buttons and pause when the document becomes hidden. Returning to the tab never resumes automatically. Clear held input at transitions and discard the first ticker update after start/restart/resume so a stale frame delta cannot advance gameplay. Freeze the current character animation frame during pause.
 
 Consequence: the model stays independent of browser visibility and PixiJS. Application coordination owns visibility and ticker handling; disposal removes its listener. Hazards use a spiked cross shape, distinct from food beyond color; T06 may improve presentation without changing damage rules. Simultaneous contact resolution follows item order and stops immediately at zero lives; contact resolution precedes missed-food penalties.
+
+## D21 — Single-owner application and asset lifecycle
+
+Status: adopted for Q01 (2026-09-19).
+
+Decision: one `GameApp` owns the global PixiJS `Assets` cache at a time. Construction owns resources immediately; disposal is permanent and idempotent, and `start()` after disposal is a safe no-op. A single load attempt may run at once. Disposal invalidates callbacks immediately and waits for in-flight load settlement before unloading its acquired URLs. Failed attempts release partial successes before an alive retry. The view is destroyed before texture unload. Async unload errors are caught and logged.
+
+Reason: PixiJS 7.2.4 uses a global asset cache and asynchronous `Assets.load`/`Assets.unload`. Unloading before a pending load settles can leave a newly acquired texture cached. Independent simultaneous application ownership would require reference counting and is outside the game's scope.
+
+Consequence: late progress, success, and failure cannot revive a disposed app. A live failed load remains recoverable by retry without duplicate tickers. Simultaneous `GameApp` instances sharing asset URLs are unsupported.
+
+## D22 — Scoped UI actions and transition focus
+
+Status: adopted in Q02.
+
+Decision: `GameUI` receives its DOM root and a typed object of named actions. It resolves controls only within that root. Screen changes, rather than repeated HUD renders, move focus to the newly available primary control: Start, Pause, Resume, Play again, or Retry. Loading recovery focuses the loading heading until an action becomes available. A dedicated polite status announces game over and the final score once per transition.
+
+Reason: named wiring makes application actions explicit; scoped lookup prevents accidental binding to unrelated page elements. Transition-based focus keeps keyboard users on visible controls without interrupting each animation frame.
+
+Consequence: this does not change Q01's single-application ownership of Pixi's global asset cache. Structural accessibility checks are distinct from testing with a real screen reader.

@@ -1,7 +1,28 @@
 import { SessionSnapshot } from '../game/types';
 import { FullscreenState } from '../rendering/GameViewport';
 
+export interface GameUIActions {
+  start: () => void;
+  restart: () => void;
+  retry: () => void;
+  fullscreen: () => void;
+  pause: () => void;
+  resume: () => void;
+  mute: () => void;
+}
+
+type ScreenState =
+  | 'loading'
+  | 'loadError'
+  | 'ready'
+  | 'playing'
+  | 'paused'
+  | 'gameOver';
+
 export class GameUI {
+  private screenState: ScreenState = 'loading';
+  private readonly root: HTMLElement;
+  private readonly resultAnnouncement: HTMLElement;
   private readonly scoreElement: HTMLElement;
   private readonly livesElement: HTMLElement;
   private readonly stageElement: HTMLElement;
@@ -28,15 +49,8 @@ export class GameUI {
   private readonly handleResume: () => void;
   private readonly handleMute: () => void;
 
-  public constructor(
-    onStart: () => void,
-    onRestart: () => void,
-    onRetry: () => void,
-    onFullscreen: () => void,
-    onPause: () => void,
-    onResume: () => void,
-    onMute: () => void,
-  ) {
+  public constructor(root: HTMLElement, actions: GameUIActions) {
+    this.root = root;
     this.scoreElement = this.requireElement<HTMLElement>('#score');
     this.livesElement = this.requireElement<HTMLElement>('#lives');
     this.stageElement = this.requireElement<HTMLElement>('#stage');
@@ -51,6 +65,9 @@ export class GameUI {
     this.resumeButton =
       this.requireElement<HTMLButtonElement>('#resume-button');
     this.finalScoreElement = this.requireElement<HTMLElement>('#final-score');
+    this.resultAnnouncement = this.requireElement<HTMLElement>(
+      '#result-announcement',
+    );
     this.startButton = this.requireElement<HTMLButtonElement>('#start-button');
     this.restartButton =
       this.requireElement<HTMLButtonElement>('#restart-button');
@@ -59,13 +76,13 @@ export class GameUI {
     this.fullscreenStatus =
       this.requireElement<HTMLElement>('#fullscreen-status');
     this.muteButton = this.requireElement<HTMLButtonElement>('#mute-button');
-    this.handleStart = onStart;
-    this.handleRestart = onRestart;
-    this.handleRetry = onRetry;
-    this.handleFullscreen = onFullscreen;
-    this.handlePause = onPause;
-    this.handleResume = onResume;
-    this.handleMute = onMute;
+    this.handleStart = actions.start;
+    this.handleRestart = actions.restart;
+    this.handleRetry = actions.retry;
+    this.handleFullscreen = actions.fullscreen;
+    this.handlePause = actions.pause;
+    this.handleResume = actions.resume;
+    this.handleMute = actions.mute;
     this.startButton.addEventListener('click', this.handleStart);
     this.restartButton.addEventListener('click', this.handleRestart);
     this.retryButton.addEventListener('click', this.handleRetry);
@@ -76,20 +93,19 @@ export class GameUI {
   }
 
   public render(snapshot: SessionSnapshot): void {
-    this.scoreElement.textContent = String(snapshot.score);
-    this.livesElement.textContent = String(snapshot.lives);
-    this.stageElement.textContent = String(snapshot.stage);
-    this.startScreen.hidden = snapshot.state !== 'ready';
-    this.gameOverScreen.hidden = snapshot.state !== 'gameOver';
-    this.pauseScreen.hidden = snapshot.state !== 'paused';
-    this.pauseButton.hidden = snapshot.state !== 'playing';
-    this.finalScoreElement.textContent = String(snapshot.score);
+    this.setTextIfChanged(this.scoreElement, String(snapshot.score));
+    this.setTextIfChanged(this.livesElement, String(snapshot.lives));
+    this.setTextIfChanged(this.stageElement, String(snapshot.stage));
+    this.setTextIfChanged(this.finalScoreElement, String(snapshot.score));
+    this.transition(snapshot.state, snapshot.score);
+  }
+
+  private setTextIfChanged(element: HTMLElement, value: string): void {
+    if (element.textContent !== value) element.textContent = value;
   }
 
   public showLoading(progress: number): void {
-    this.startScreen.hidden = true;
     this.startButton.disabled = true;
-    this.loadingScreen.hidden = false;
     this.loadingStatus.hidden = false;
     this.loadError.hidden = true;
     this.retryButton.hidden = true;
@@ -97,20 +113,44 @@ export class GameUI {
     this.loadingStatus.textContent = `Loading art… ${Math.round(
       progress * 100,
     )}%`;
+    this.transition('loading');
   }
 
   public showReady(): void {
-    this.loadingScreen.hidden = true;
     this.startButton.disabled = false;
+    this.transition('ready');
   }
 
   public showLoadError(): void {
-    this.loadingScreen.hidden = false;
     this.loadingStatus.hidden = true;
     this.loadError.hidden = false;
     this.retryButton.hidden = false;
     this.retryButton.disabled = false;
-    this.retryButton.focus();
+    this.transition('loadError');
+  }
+
+  private transition(next: ScreenState, score: number = 0): void {
+    if (next === this.screenState) return;
+    this.screenState = next;
+    this.loadingScreen.hidden = next !== 'loading' && next !== 'loadError';
+    this.startScreen.hidden = next !== 'ready';
+    this.pauseScreen.hidden = next !== 'paused';
+    this.gameOverScreen.hidden = next !== 'gameOver';
+    this.pauseButton.hidden = next !== 'playing';
+    if (next === 'gameOver') {
+      this.resultAnnouncement.textContent = `Game over. Final score: ${score}.`;
+    } else if (this.resultAnnouncement.textContent) {
+      this.resultAnnouncement.textContent = '';
+    }
+    const destination: HTMLElement | null = {
+      loading: this.loadingStatus,
+      loadError: this.retryButton,
+      ready: this.startButton,
+      playing: this.pauseButton,
+      paused: this.resumeButton,
+      gameOver: this.restartButton,
+    }[next];
+    destination?.focus();
   }
 
   public setFullscreenState(state: FullscreenState): void {
@@ -139,7 +179,8 @@ export class GameUI {
   }
 
   private requireElement<TElement extends Element>(selector: string): TElement {
-    const element: TElement | null = document.querySelector<TElement>(selector);
+    const element: TElement | null =
+      this.root.querySelector<TElement>(selector);
 
     if (!element) {
       throw new Error(`Missing ${selector} element`);

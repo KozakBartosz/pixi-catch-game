@@ -38,7 +38,7 @@
       <section id="loading-screen" class="screen" aria-live="polite">
         <div class="panel">
           <p class="eyebrow">Catch Game</p>
-          <h1 id="loading-status">Loading art… 0%</h1>
+          <h1 id="loading-status" tabindex="-1">Loading art… 0%</h1>
           <div id="load-error" hidden>
             <h1>Art failed to load</h1>
             <p>Check your connection, then try loading the game art again.</p>
@@ -50,10 +50,11 @@
         <div class="panel">
           <p class="eyebrow">Catch Game</p>
           <h1>Catch the falling food</h1>
-          <p>Move with the left and right arrow keys or A and D. Catch food; avoid spiked crosses.</p>
+          <p>Move with the left and right arrow keys or A and D. On touch screens, press and hold the board, then drag to move. Catch food; avoid spiked crosses.</p>
           <button id="start-button" type="button" disabled>Start game</button>
         </div>
       </section>
+      <p id="result-announcement" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></p>
       <section id="game-over-screen" class="screen" hidden>
         <div class="panel">
           <p class="eyebrow">Run complete</p>

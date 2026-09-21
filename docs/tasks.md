@@ -285,3 +285,33 @@ Verification (2026-09-21):
 - Updated the start instructions, README, context, plan, and decision log. Historical T05 and D14–D20 records remain traceable; D23 supersedes the hazard rules.
 - On Node `16.16.0` / npm `8.11.0`, typecheck, lint, format check, Jest (49 tests in ten suites), and production build passed. `git diff --check` passed.
 - Development-browser check showed the new start instructions and successful transition into play with the food-only rendering path. Real touch hardware was not available for this change; pointer behavior itself was not modified.
+
+## T09 — Reachable consecutive food
+
+- [x] Limit each new food position using the travel time between projected catches, player speed, and collision widths (D24).
+- [x] Preserve seeded random placement within the allowed range and reset the reference on restart.
+- [x] Add a deterministic regression for the previously impossible full-board jump at maximum configured speed and frequency.
+
+Verification: the regression failed before the fix with a 768-unit jump against a 208-unit reach. All 50 tests, typecheck, lint, format check, and build passed after the fix on local Node 24.20.0/npm 11.19.0. The required Node 16.16.0/npm 8.11.0 executables were unavailable in this environment; exact-runtime verification remains open. Browser and physical touch playtesting remain useful for difficulty tuning.
+
+## T10 — Character acceleration
+
+- [x] Accelerate from rest to maximum speed in 0.5 seconds, decelerate on release, and pass through zero when reversing (D25).
+- [x] Keep pointer targeting bounded and stop at the target; reset velocity on restart and board edges.
+- [x] Retain D24 spacing at maximum player speed to encourage running starts.
+
+Verification: 53 deterministic tests in ten suites passed, including the 0.5-second ramp, release, reversal, pointer target, keyboard priority, frame-duration consistency, bounds, and restart. Typecheck, lint, format check, production build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required-runtime and browser movement verification remain open in this environment.
+
+## T11 — Snappier character movement
+
+- [x] Reduce acceleration time to 0.2 seconds and braking time to 0.1 seconds (D26).
+- [x] Keep maximum speed, food spacing, pointer targeting, and movement bounds.
+
+Verification: all 53 tests in ten suites, typecheck, lint, format check, production build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Movement tests cover ramp, braking, reversal, target stopping, and restart. Required-runtime and browser movement verification remain open in this environment.
+
+## T12 — Fine-tune movement response
+
+- [x] Shorten acceleration to 0.16 seconds and braking to 0.08 seconds (D27).
+- [x] Preserve maximum speed and spawn spacing; integrate velocity changes accurately across frame boundaries.
+
+Verification: all 53 tests in ten suites, typecheck, lint, format check, production build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Movement tests cover response timing, reversal, pointer stopping, restart, and frame-duration consistency. Required-runtime and browser movement verification remain open in this environment.

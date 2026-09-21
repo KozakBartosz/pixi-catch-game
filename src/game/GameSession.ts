@@ -26,6 +26,8 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   playerHeight: 120,
   playerBottomMargin: 24,
   playerSpeed: 420,
+  playerAccelerationSeconds: 0.16,
+  playerDecelerationSeconds: 0.08,
   itemSize: 32,
   stages: DEFAULT_STAGE_PROGRESSION,
   initialSpawnDelay: 0.35,
@@ -46,6 +48,9 @@ export class GameSession {
   private items: FallingItemState[] = [];
   private spawnTimer: number;
   private nextItemId: number = 1;
+  private elapsedSeconds: number = 0;
+  private previousSpawn: { x: number; catchTime: number } | null = null;
+  private playerVelocity: number = 0;
 
   public constructor(
     config: GameConfig = DEFAULT_GAME_CONFIG,
@@ -74,6 +79,9 @@ export class GameSession {
     this.items = [];
     this.spawnTimer = this.config.initialSpawnDelay;
     this.nextItemId = 1;
+    this.elapsedSeconds = 0;
+    this.previousSpawn = null;
+    this.playerVelocity = 0;
     this.state = 'playing';
   }
 
@@ -133,6 +141,7 @@ export class GameSession {
     input: InputState,
     events: GameplayEvent[],
   ): void {
+    this.elapsedSeconds += dtSeconds;
     this.movePlayer(dtSeconds, input);
     this.updateSpawner(dtSeconds);
 
@@ -178,6 +187,7 @@ export class GameSession {
 
   private movePlayer(dtSeconds: number, input: InputState): void {
     const keyboardDirection: number = Number(input.right) - Number(input.left);
+    const previousX: number = this.player.x;
     const playerCenterX: number = this.player.x + this.player.width / 2;
     const pointerDirection: number =
       input.targetX === undefined
@@ -185,14 +195,56 @@ export class GameSession {
         : Math.sign(input.targetX - playerCenterX);
     const direction: number =
       keyboardDirection === 0 ? pointerDirection : keyboardDirection;
-    const maximumTravel: number = this.config.playerSpeed * dtSeconds;
-    const travel: number =
-      keyboardDirection === 0 && input.targetX !== undefined
-        ? Math.min(maximumTravel, Math.abs(input.targetX - playerCenterX))
-        : maximumTravel;
-    const requestedX: number = this.player.x + direction * travel;
+    const targetVelocity: number = direction * this.config.playerSpeed;
+    const acceleration: number =
+      this.config.playerSpeed / this.config.playerAccelerationSeconds;
+    const braking: number =
+      this.config.playerSpeed / this.config.playerDecelerationSeconds;
+    let remainingSeconds: number = dtSeconds;
+    let travel: number = 0;
+    if (
+      this.playerVelocity !== 0 &&
+      Math.sign(this.playerVelocity) !== Math.sign(targetVelocity)
+    ) {
+      const brakeSeconds: number = Math.min(
+        remainingSeconds,
+        Math.abs(this.playerVelocity) / braking,
+      );
+      const previousVelocity: number = this.playerVelocity;
+      this.playerVelocity -=
+        Math.sign(previousVelocity) * braking * brakeSeconds;
+      if (Math.abs(this.playerVelocity) < 1e-9) {
+        this.playerVelocity = 0;
+      }
+      travel += ((previousVelocity + this.playerVelocity) / 2) * brakeSeconds;
+      remainingSeconds -= brakeSeconds;
+    }
+    if (remainingSeconds > 0) {
+      const rate: number = targetVelocity === 0 ? braking : acceleration;
+      const changeSeconds: number = Math.min(
+        remainingSeconds,
+        Math.abs(targetVelocity - this.playerVelocity) / rate,
+      );
+      const previousVelocity: number = this.playerVelocity;
+      this.playerVelocity +=
+        Math.sign(targetVelocity - previousVelocity) * rate * changeSeconds;
+      travel +=
+        ((previousVelocity + this.playerVelocity) / 2) * changeSeconds +
+        this.playerVelocity * (remainingSeconds - changeSeconds);
+    }
+    const requestedX: number = this.player.x + travel;
     const maximumX: number = this.config.boardWidth - this.player.width;
     this.player.x = Math.min(maximumX, Math.max(0, requestedX));
+    if (this.player.x !== requestedX) {
+      this.playerVelocity = 0;
+    }
+    if (keyboardDirection === 0 && input.targetX !== undefined) {
+      const targetPlayerX: number = input.targetX - this.player.width / 2;
+      if ((targetPlayerX - previousX) * (targetPlayerX - this.player.x) <= 0) {
+        this.player.x = Math.min(maximumX, Math.max(0, targetPlayerX));
+        this.playerVelocity = 0;
+      }
+    }
   }
 
   private updateSpawner(dtSeconds: number): void {
@@ -206,9 +258,29 @@ export class GameSession {
 
   private spawnItem(): void {
     const maximumX: number = this.config.boardWidth - this.config.itemSize;
+    const spawnTime: number = this.elapsedSeconds + this.spawnTimer;
+    const catchTime: number =
+      spawnTime + this.player.y / this.stageSettings.fallSpeed;
+    const sampledX: number = this.random() * maximumX;
+    const availableTravel: number = this.previousSpawn
+      ? this.config.playerSpeed *
+        Math.max(0, catchTime - this.previousSpawn.catchTime)
+      : maximumX;
+    const overlapAllowance: number =
+      (this.config.playerWidth + this.config.itemSize) / 2;
+    const maximumDistance: number = Math.max(
+      0,
+      availableTravel + overlapAllowance - 8,
+    );
+    const x: number = this.previousSpawn
+      ? Math.min(
+          this.previousSpawn.x + maximumDistance,
+          Math.max(this.previousSpawn.x - maximumDistance, sampledX),
+        )
+      : sampledX;
     const item: FallingItemState = {
       id: this.nextItemId,
-      x: Math.min(maximumX, Math.max(0, this.random() * maximumX)),
+      x: Math.min(maximumX, Math.max(0, x)),
       y: -this.config.itemSize,
       width: this.config.itemSize,
       height: this.config.itemSize,
@@ -216,6 +288,7 @@ export class GameSession {
     };
 
     this.nextItemId += 1;
+    this.previousSpawn = { x: item.x, catchTime };
     this.items.push(item);
   }
 

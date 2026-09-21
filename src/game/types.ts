@@ -61,6 +61,8 @@ export interface GameConfig {
   playerHeight: number;
   playerBottomMargin: number;
   playerSpeed: number;
+  playerAccelerationSeconds: number;
+  playerDecelerationSeconds: number;
   itemSize: number;
   stages: StageProgressionConfig;
   initialSpawnDelay: number;

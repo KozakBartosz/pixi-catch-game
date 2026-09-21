@@ -38,13 +38,35 @@ const createConfig: (overrides?: TestConfigOverrides) => GameConfig = (
 };
 
 describe('GameSession', (): void => {
-  it('moves toward a pointer target at player speed without overshooting', (): void => {
+  it('keeps consecutive food within the travel available between catch times', (): void => {
+    const randomValues: number[] = [0, 1];
+    const session: GameSession = new GameSession(
+      createConfig({
+        initialSpawnDelay: 0,
+        spawnInterval: 0.4,
+        itemFallSpeed: 420,
+      }),
+      (): number => randomValues.shift() ?? 1,
+    );
+    session.start();
+    session.update(0.41, IDLE_INPUT);
+
+    const items: FallingItemState[] = session.getSnapshot().items;
+    expect(items).toHaveLength(2);
+    const travelTime: number = 0.4;
+    const overlapAllowance: number =
+      (DEFAULT_GAME_CONFIG.playerWidth + DEFAULT_GAME_CONFIG.itemSize) / 2;
+    expect(items[1].x - items[0].x).toBeLessThanOrEqual(
+      DEFAULT_GAME_CONFIG.playerSpeed * travelTime + overlapAllowance,
+    );
+  });
+  it('accelerates toward a pointer target without overshooting', (): void => {
     const session: GameSession = new GameSession();
     session.start();
     const initialX: number = session.getSnapshot().player.x;
 
     session.update(0.1, { left: false, right: false, targetX: 700 });
-    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 42);
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 13.125);
 
     const centerX: number =
       session.getSnapshot().player.x + session.getSnapshot().player.width / 2;
@@ -53,7 +75,7 @@ describe('GameSession', (): void => {
       right: false,
       targetX: centerX + 2,
     });
-    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 44);
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 15.125);
   });
 
   it('gives explicit keyboard movement priority over an active pointer', (): void => {
@@ -62,7 +84,40 @@ describe('GameSession', (): void => {
     const initialX: number = session.getSnapshot().player.x;
 
     session.update(0.1, { left: true, right: false, targetX: 800 });
-    expect(session.getSnapshot().player.x).toBeCloseTo(initialX - 42);
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX - 13.125);
+  });
+  it('reaches maximum speed after 0.16 seconds and stops in 0.08 seconds', (): void => {
+    const session: GameSession = new GameSession(createConfig());
+    session.start();
+    const initialX: number = session.getSnapshot().player.x;
+
+    session.update(0.16, RIGHT_INPUT);
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 33.6);
+    session.update(0.1, RIGHT_INPUT);
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 75.6);
+    session.update(0.08, IDLE_INPUT);
+    expect(session.getSnapshot().player.x).toBeCloseTo(initialX + 92.4);
+  });
+  it('slows through zero before moving in the opposite direction', (): void => {
+    const session: GameSession = new GameSession(createConfig());
+    session.start();
+    session.update(0.16, RIGHT_INPUT);
+    const turningX: number = session.getSnapshot().player.x;
+
+    session.update(0.08, { left: true, right: false });
+    expect(session.getSnapshot().player.x).toBeCloseTo(turningX + 16.8);
+    session.update(0.1, { left: true, right: false });
+    expect(session.getSnapshot().player.x).toBeLessThan(turningX + 16.8);
+  });
+  it('resets momentum on restart', (): void => {
+    const session: GameSession = new GameSession(createConfig());
+    session.start();
+    session.update(0.16, RIGHT_INPUT);
+    session.restart();
+    const restartedX: number = session.getSnapshot().player.x;
+
+    session.update(0.1, RIGHT_INPUT);
+    expect(session.getSnapshot().player.x).toBeCloseTo(restartedX + 13.125);
   });
   it('awards one point for a caught item and resolves it once', (): void => {
     const session: GameSession = new GameSession(
@@ -151,6 +206,7 @@ describe('GameSession', (): void => {
     expect(session.getSnapshot().player.x).toBe(0);
 
     session.update(2, RIGHT_INPUT);
+    session.update(0.2, RIGHT_INPUT);
     expect(session.getSnapshot().player.x).toBe(
       DEFAULT_GAME_CONFIG.boardWidth - DEFAULT_GAME_CONFIG.playerWidth,
     );

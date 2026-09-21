@@ -8,7 +8,7 @@ See [decisions.md](decisions.md) for the rationale behind adopted choices and th
 
 ## Required behavior
 
-- The player moves horizontally at the bottom of the board.
+- The player moves horizontally at the bottom of the board, taking 0.16 seconds to accelerate to maximum speed and 0.08 seconds to stop (D27).
 - Food falls from the top. Catching an item awards one point.
 - Each missed item removes one life. A session starts with ten lives and ends at zero.
 - Each item is resolved exactly once: caught or missed.
@@ -69,7 +69,7 @@ Play is divided into stages that change visual atmosphere and increase difficult
 
 Stage catch thresholds and speeds are tuning decisions, not fixed assignment requirements. Existing items retain their original speed while new items use the new stage settings. Cap difficulty so the game remains playable.
 
-Sample food spawn positions randomly within board bounds (D15). Multiple food items can overlap; each missed item costs one life. Reachability tuning remains deferred.
+Sample food spawn positions randomly within board bounds, limited by travel at the player's maximum speed between consecutive projected catches (D24–D25). A running start can be needed to catch every item. Multiple food items can overlap; each missed item costs one life.
 
 New levels should require configuration changes. New food appearances should require manifest/configuration entries. Future special-item behavior can extend the item/event types when requested. Combat, inventory, a backend, and a general-purpose entity framework are not needed for this scope.
 

@@ -253,3 +253,39 @@ Decision: only food falls. Catching food awards one point and advances catch-bas
 Reason: the user requested removal of the harmful collectable mechanic after playing the game.
 
 Consequence: remove item kinds, hazard spawn probability, contact damage, hazard graphics, and avoidance instructions. Preserve the historical rationale above so the earlier choice remains traceable.
+
+## D24 — Keep consecutive food reachable
+
+Status: adopted on 2026-09-21 after playtest feedback; supersedes D15's unconstrained horizontal placement.
+
+Decision: sample each food position randomly, then limit its horizontal distance from the previous spawned food. The limit uses player speed and the difference between their projected arrival times at the player's upper edge, including each item's spawn-time fall speed. Allow the combined horizontal collision reach of player and food, with an 8-unit margin. Reset the previous-spawn reference on restart.
+
+Reason: unrestricted positions can jump across the board faster than the character can travel between consecutive catches, especially at the maximum fall speed and spawn frequency.
+
+Consequence: positions remain random within the reachable interval and board bounds. This guarantees a geometric route between consecutive projected catch positions, assuming the previous food was caught; actual catches still require player input.
+
+## D25 — Add character acceleration
+
+Status: adopted on 2026-09-21; timing refined by D26.
+
+Decision: the character accelerates linearly from rest to maximum horizontal speed in 0.5 seconds. Releasing input decelerates at the same rate; reversing direction passes through zero speed. Pointer movement stops at the target without overshooting. Keep D24's food spacing based on maximum speed, so catching every item may require a running start.
+
+Reason: acceleration adds timing and route planning to catching food.
+
+Consequence: player velocity belongs to the session and resets on restart or at board edges. Pause freezes velocity with the rest of simulation state.
+
+## D26 — Make acceleration more responsive
+
+Status: adopted on 2026-09-21 after playtesting; refines D25's timing.
+
+Decision: reach maximum speed in 0.2 seconds and brake from maximum speed to rest in 0.1 seconds. Changing direction uses the braking rate until velocity reaches zero, then the acceleration rate. Keep the maximum speed and D24 food spacing unchanged.
+
+Reason: the original 0.5-second ramp made the character feel too sluggish.
+
+## D27 — Fine-tune movement response
+
+Status: adopted on 2026-09-21 after further playtesting; refines D26's timing.
+
+Decision: shorten acceleration to 0.16 seconds and braking to 0.08 seconds. Integrate the exact time spent accelerating or braking within each simulation step, so distance does not depend on frame boundaries. Keep maximum speed and food spacing unchanged.
+
+Reason: movement still felt slightly too heavy after D26.

@@ -27,7 +27,7 @@ npm start
 - Move left: `A` or `Left Arrow`
 - Move right: `D` or `Right Arrow`
 - Touch or pointer: press/hold on the board and drag horizontally
-- Start, pause, resume, restart, mute, and fullscreen: use the labelled HTML buttons; they are reachable by keyboard with `Tab` and activated with `Enter` or `Space`
+- Start, pause, resume, restart, mute, and fullscreen: use the labelled HTML buttons; they are reachable by keyboard with `Tab` and activated with `Enter` or `Space`. During a run, `P` or `Escape` toggles pause and resume.
 - Leave fullscreen: the `Exit fullscreen` button or the browser's `Escape` shortcut
 
 Switching away from the tab pauses an active run. Returning does not resume it automatically; select `Resume` when ready. Sound is optional, begins only after a start/restart interaction, and can be muted without affecting gameplay.

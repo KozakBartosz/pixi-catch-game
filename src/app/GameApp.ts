@@ -19,6 +19,7 @@ export class GameApp {
   private readonly audio: GameAudio;
   private readonly tick: () => void;
   private readonly handleVisibilityChange: () => void;
+  private readonly handlePauseShortcut: (event: KeyboardEvent) => void;
   private started: boolean = false;
   private disposed: boolean = false;
   private loading: boolean = false;
@@ -66,7 +67,26 @@ export class GameApp {
         this.handlePause();
       }
     };
+    this.handlePauseShortcut = (event: KeyboardEvent): void => {
+      if (
+        event.repeat ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        (event.code !== 'Escape' && event.code !== 'KeyP')
+      ) {
+        return;
+      }
+
+      const state: SessionSnapshot['state'] = this.session.getSnapshot().state;
+      if (state !== 'playing' && state !== 'paused') return;
+
+      if (event.code === 'KeyP') event.preventDefault();
+      if (state === 'playing') this.handlePause();
+      else this.handleResume();
+    };
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    document.addEventListener('keydown', this.handlePauseShortcut);
     root.prepend(this.pixiApp.view);
     this.ui.showLoading(0);
   }
@@ -97,6 +117,7 @@ export class GameApp {
       'visibilitychange',
       this.handleVisibilityChange,
     );
+    document.removeEventListener('keydown', this.handlePauseShortcut);
     this.view?.dispose();
     this.view = null;
     if (!this.loading) {

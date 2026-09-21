@@ -315,3 +315,13 @@ Verification: all 53 tests in ten suites, typecheck, lint, format check, product
 - [x] Preserve maximum speed and spawn spacing; integrate velocity changes accurately across frame boundaries.
 
 Verification: all 53 tests in ten suites, typecheck, lint, format check, production build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Movement tests cover response timing, reversal, pointer stopping, restart, and frame-duration consistency. Required-runtime and browser movement verification remain open in this environment.
+
+## UI palette and pixel typography refresh (2026-09-21)
+
+- Replaced rounded blue HTML UI with square burgundy panels, stronger borders, cream text and a locally bundled Silkscreen pixel font. Gameplay and canvas rendering are unchanged. Font source and OFL license are recorded in `public/assets/SOURCES.md`.
+- Verified start and pause screens visually in the browser at a narrow viewport; controls and text remained visible. `npm run format:check`, `npm run typecheck`, `npm run lint`, `npm test -- --runInBand` (53 tests), `npm run build`, and `git diff --check` passed on Node 24.20.0/npm 11.19.0. Exact Node 16.16.0/npm 8.11.0 verification remains open here.
+
+## Pause keyboard shortcuts (2026-09-21)
+
+- Added `P` and `Escape` to toggle pause/resume during an active run. Held-key repeats and modified shortcuts are ignored; `Escape` remains available to the browser for native fullscreen exit. The listener is removed on disposal.
+- Browser check confirmed `P` pauses and `Escape` resumes and pauses again. Automated verification: 54 tests, typecheck, lint, format check, build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required Node 16.16.0/npm 8.11.0 remains unverified in this environment.

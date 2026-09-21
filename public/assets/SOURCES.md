@@ -12,5 +12,8 @@ Downloaded on 2026-09-14. Original PNG files, without modifications.
 - `backgrounds/day.png`, `backgrounds/crossfade.png`, `backgrounds/night.png`:
   supplied by the project owner on 2026-09-18. Original source and license were
   not provided.
+- `Silkscreen-Regular.ttf`: Silkscreen by The Silkscreen Project Authors.
+  Source: https://github.com/google/fonts/tree/main/ofl/silkscreen
+  License: SIL Open Font License 1.1, bundled as `Silkscreen-OFL.txt`.
 
 Refer to the authors' pages and bundled readme for usage terms.

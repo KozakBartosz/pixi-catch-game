@@ -15,6 +15,18 @@ jest.mock('../rendering/GameViewport');
 jest.mock('../ui/GameUI');
 
 describe('GameApp pause integration', (): void => {
+  const shortcut: (code: string, repeat?: boolean) => Event = (
+    code: string,
+    repeat: boolean = false,
+  ): Event => {
+    const event: Event = new Event('keydown', { cancelable: true });
+    Object.defineProperties(event, {
+      code: { value: code },
+      repeat: { value: repeat },
+    });
+    return event;
+  };
+
   it('requires resume after hiding and discards the stale ticker delta', async (): Promise<void> => {
     const previousDocument: PropertyDescriptor | undefined =
       Object.getOwnPropertyDescriptor(globalThis, 'document');
@@ -105,6 +117,78 @@ describe('GameApp pause integration', (): void => {
       page.hidden = true;
       page.dispatchEvent(new Event('visibilitychange'));
       expect(pauseSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.restoreAllMocks();
+      for (const [name, descriptor] of [
+        ['document', previousDocument],
+        ['window', previousWindow],
+      ] as const) {
+        if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+        else Reflect.deleteProperty(globalThis, name);
+      }
+    }
+  });
+
+  it('toggles pause with P and Escape without acting on repeats or after disposal', async (): Promise<void> => {
+    jest.clearAllMocks();
+    const previousDocument: PropertyDescriptor | undefined =
+      Object.getOwnPropertyDescriptor(globalThis, 'document');
+    const previousWindow: PropertyDescriptor | undefined =
+      Object.getOwnPropertyDescriptor(globalThis, 'window');
+    const page: EventTarget & { hidden: boolean } = Object.assign(
+      new EventTarget(),
+      { hidden: false },
+    );
+    Object.defineProperty(globalThis, 'document', {
+      configurable: true,
+      value: page,
+    });
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: { devicePixelRatio: 1 },
+    });
+    (Application as jest.MockedClass<typeof Application>).mockImplementation(
+      (): Application =>
+        ({
+          ticker: { add: jest.fn(), remove: jest.fn() },
+          view: {},
+          destroy: jest.fn(),
+        } as unknown as Application),
+    );
+    jest
+      .spyOn(GameAssets.prototype, 'load')
+      .mockResolvedValue({} as LoadedGameAssets);
+    const pauseSpy: jest.SpyInstance = jest.spyOn(
+      GameSession.prototype,
+      'pause',
+    );
+    const resumeSpy: jest.SpyInstance = jest.spyOn(
+      GameSession.prototype,
+      'resume',
+    );
+    const app: GameApp = new GameApp({
+      prepend: jest.fn(),
+    } as unknown as HTMLElement);
+    try {
+      page.dispatchEvent(shortcut('KeyP'));
+      expect(pauseSpy).not.toHaveBeenCalled();
+      app.start();
+      await Promise.resolve();
+      const actions: ConstructorParameters<typeof GameUI> = (
+        GameUI as jest.MockedClass<typeof GameUI>
+      ).mock.calls[0];
+      actions[1].start();
+      page.dispatchEvent(shortcut('KeyP'));
+      expect(pauseSpy).toHaveBeenCalledTimes(1);
+      page.dispatchEvent(shortcut('KeyP', true));
+      expect(resumeSpy).not.toHaveBeenCalled();
+      page.dispatchEvent(shortcut('Escape'));
+      expect(resumeSpy).toHaveBeenCalledTimes(1);
+      page.dispatchEvent(shortcut('Escape'));
+      expect(pauseSpy).toHaveBeenCalledTimes(2);
+      app.dispose();
+      page.dispatchEvent(shortcut('KeyP'));
+      expect(resumeSpy).toHaveBeenCalledTimes(1);
     } finally {
       jest.restoreAllMocks();
       for (const [name, descriptor] of [

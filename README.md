@@ -1,3 +1,5 @@
+![Pixi Catch Game screenshot](docs/images/game-screenshot.png)
+
 # Pixi Catch Game
 
 A small TypeScript/PixiJS game about catching falling food. Move the character along the bottom of the board and earn one point for each food item. Missing food costs one of the ten lives. The run ends at zero lives.

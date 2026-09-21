@@ -15,13 +15,7 @@ import {
   SessionState,
 } from '../game/types';
 import { BackgroundOpacity, getBackgroundOpacity } from './backgroundCycle';
-
-interface TimedEffect {
-  display: DisplayObject;
-  age: number;
-  duration: number;
-  expand: boolean;
-}
+import { CatchBurst } from './CatchBurst';
 
 const THEME_TINTS: Readonly<Record<string, number>> = {
   midnight: 0x334a8a,
@@ -48,7 +42,7 @@ export class GameView {
   private lastSessionState: SessionState | null = null;
   private playerAnimation: 'idle' | 'left' | 'right' = 'idle';
   private lastFacing: 'left' | 'right' = 'right';
-  private readonly timedEffects: TimedEffect[] = [];
+  private readonly catchBursts: CatchBurst[] = [];
   private backgroundElapsedSeconds: number = 0;
   private currentThemeTint: number = THEME_TINTS.midnight;
   private targetThemeTint: number = THEME_TINTS.midnight;
@@ -125,29 +119,25 @@ export class GameView {
   public advanceEffects(dtSeconds: number): void {
     const step: number = Math.min(Math.max(dtSeconds, 0), 0.1);
     for (
-      let index: number = this.timedEffects.length - 1;
+      let index: number = this.catchBursts.length - 1;
       index >= 0;
       index -= 1
     ) {
-      const effect: TimedEffect = this.timedEffects[index];
-      effect.age += step;
-      const progress: number = Math.min(1, effect.age / effect.duration);
-      effect.display.alpha = 1 - progress;
-      if (effect.expand) effect.display.scale.set(1 + progress * 0.8);
-      if (progress >= 1) {
-        this.effects.removeChild(effect.display);
-        effect.display.destroy();
-        this.timedEffects.splice(index, 1);
+      const burst: CatchBurst = this.catchBursts[index];
+      if (burst.advance(step)) {
+        this.effects.removeChild(burst.container);
+        burst.container.destroy({ children: true });
+        this.catchBursts.splice(index, 1);
       }
     }
   }
 
   public resetFeedback(): void {
-    for (const effect of this.timedEffects) {
-      this.effects.removeChild(effect.display);
-      effect.display.destroy();
+    for (const burst of this.catchBursts) {
+      this.effects.removeChild(burst.container);
+      burst.container.destroy({ children: true });
     }
-    this.timedEffects.length = 0;
+    this.catchBursts.length = 0;
   }
 
   public render(snapshot: SessionSnapshot): void {
@@ -189,21 +179,9 @@ export class GameView {
   }
 
   private addCatchEffect(x: number, y: number): void {
-    const sparkle: Graphics = new Graphics();
-    sparkle.lineStyle(4, 0xfef08a, 1);
-    sparkle.drawCircle(0, 0, 18);
-    sparkle.moveTo(-24, 0);
-    sparkle.lineTo(24, 0);
-    sparkle.moveTo(0, -24);
-    sparkle.lineTo(0, 24);
-    sparkle.position.set(x, y);
-    this.effects.addChild(sparkle);
-    this.timedEffects.push({
-      display: sparkle,
-      age: 0,
-      duration: this.reducedMotion ? 0.12 : 0.32,
-      expand: !this.reducedMotion,
-    });
+    const burst: CatchBurst = new CatchBurst(x, y, this.reducedMotion);
+    this.effects.addChild(burst.container);
+    this.catchBursts.push(burst);
   }
 
   private createBackground(texture: Texture): Sprite {

@@ -332,3 +332,19 @@ Verification: all 53 tests in ten suites, typecheck, lint, format check, product
 - [x] Keep event-triggered timing, pause freeze, and restart/game-over cleanup.
 
 Verification (2026-09-21): The pre-fix UI regression test failed because no viewport flash API existed. After the fix, focused UI/application tests passed; browser DOM inspection confirmed the layer is positioned against the viewport-sized game root. Full suite, typecheck, lint, format check, build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required Node 16.16.0/npm 8.11.0 and a timed visual capture of the 0.18-second flash remain unverified.
+
+## T14 — Pixel leaf ambience
+
+Status: superseded by T15 after playtest feedback. The implementation and its tests were removed because the moving leaves distracted from catching food.
+
+- [x] Add reusable PixiJS pixel leaves in a layer behind the player and food. Start them near the side tree canopies, drift inward and downward, and recycle them without per-frame graphics allocation.
+- [x] Advance only during active play, reset on a new run, and omit leaves when reduced motion is preferred. Keep them decorative: no collision or gameplay events.
+
+Verification (2026-09-21): Deterministic leaf tests cover spawn side, movement, time-step cap, reset, recycling, and reduced motion. Browser inspection confirmed visible leaves over the forest without obscuring controls or food. Formatting, typecheck, lint, all 57 tests, production build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required Node 16.16.0/npm 8.11.0 and physical-device visual checks remain open.
+
+## T15 — Catch-triggered pixel burst
+
+- [x] Remove ambient leaf particles, leaving the forest background still.
+- [x] Replace the catch ring with a brief pixel-particle burst at each caught food item. Keep particles purely presentational, fade and destroy them promptly, pause them with the game, clear them on restart, and show a shorter static burst for reduced-motion users.
+
+Verification (2026-09-21): Focused burst tests cover event position, particle count and motion, expiry, and reduced-motion behavior. Browser inspection confirmed the static forest, successful food collection and score increase, and no console warnings or errors; the 0.4-second burst was not captured in a timed screenshot. Formatting, typecheck, lint, all 57 tests, production build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required Node 16.16.0/npm 8.11.0 remains unverified here.

@@ -63,13 +63,13 @@ Use a fixed logical board with a constant aspect ratio, scaled to available spac
 6. Verify behavior, document extension points, and prepare reproducible delivery.
 7. Add touch/pointer controls (T04b) after delivery verification established the keyboard baseline.
 
-Stages 1–3 cover the core game. Levels, visual polish, and sound are assignment bonuses included in the planned follow-up stages.
+Stages 1–3 cover the core game. Stage progression, visual polish, and sound build on that foundation in the follow-up stages.
 
 ## Proposed defaults and extension points
 
 Play is divided into stages that change visual atmosphere and increase difficulty together. Stage advancement uses the number of food items caught in the current run, not elapsed time. Stages are the single progression system; earlier references to levels mean stages. Generate endless stages from progression parameters and cycle prepared visual themes without resetting difficulty. A run ends at zero lives. Initial catch thresholds and difficulty tuning are recorded in D20 and remain subject to playtesting; D12–D14 define the progression rules.
 
-Stage catch thresholds and speeds are tuning decisions, not fixed assignment requirements. Existing items retain their original speed while new items use the new stage settings. Cap difficulty so the game remains playable.
+Stage catch thresholds and speeds can be adjusted through playtesting. Existing items retain their original speed while new items use the new stage settings. Cap difficulty so the game remains playable.
 
 Sample food spawn positions randomly within board bounds, limited by travel at the player's maximum speed between consecutive projected catches (D24–D25). A running start can be needed to catch every item. Multiple food items can overlap; each missed item costs one life.
 

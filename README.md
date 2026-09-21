@@ -9,7 +9,7 @@ The game uses a fixed 800 × 600 simulation board and scales its presentation to
 - Node.js `16.16.0`
 - npm `8.11.0`
 
-Use the exact assignment runtime for delivery verification:
+Use these versions to install, run, and verify the game:
 
 ```sh
 nvm install 16.16.0

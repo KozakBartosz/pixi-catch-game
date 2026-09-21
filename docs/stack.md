@@ -4,7 +4,7 @@ Read this file before installing dependencies, changing tooling, or implementing
 
 ## Required runtime
 
-The assignment requires Node.js `16.16.0` and npm `8.11.0`. Check both executable versions before verification. An `engines` declaration or a successful build on another Node version does not prove compatibility.
+The project targets Node.js `16.16.0` and npm `8.11.0`. Check both executable versions before verification. An `engines` declaration or a successful build on another Node version does not prove compatibility.
 
 ```sh
 nvm install 16.16.0
@@ -33,7 +33,7 @@ T03 provides a framework-free PixiJS application with a DOM-independent gameplay
 | Jest / ts-jest | 29.7.0 / 29.1.2 | Node-based unit tests for the pure gameplay model. |
 | HTML/CSS | Browser native | Page layout and game interface. |
 
-Use PixiJS 7 APIs matching the installed package. Examples for other major versions may have different initialization or lifecycle APIs. No Vue/React template is required by the assignment.
+Use PixiJS 7 APIs matching the installed package. Examples for other major versions may have different initialization or lifecycle APIs. The interface uses native HTML and CSS, with no Vue or React dependency.
 
 Available scripts:
 
@@ -64,7 +64,7 @@ Files under `public/` are served from the site root; for example `/assets/food/A
 - A standalone local Git repository is initialized at this project root. It has no remote. `.gitignore` excludes `node_modules/`, `dist/`, `.DS_Store`, and log files.
 - On 2026-09-17, `npm ci`, `npm start`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test`, and `npm run build` passed with Node `16.16.0` and npm `8.11.0`. The development server returned HTTP 200 from `http://127.0.0.1:4177/` during verification.
 - The earlier Tailwind warning did not reproduce from this standalone project. It has no Tailwind package or configuration; the obsolete neighboring `BraniborskaWEB` project contains `tailwind.config.ts`, so running from or inheriting configuration from that former location was the likely source.
-- `npm audit` reports two unresolved development-server findings: one moderate advisory through Vite's esbuild dependency and one high Vite finding. npm proposes Vite 8.3.0 as the available remediation, but Vite 8 requires a newer Node runtime and is incompatible with the assignment constraint. No forced audit fix was run. Keep the development server bound to a trusted local interface and revisit these findings if the required runtime changes.
+- `npm audit` reports two unresolved development-server findings: one moderate advisory through Vite's esbuild dependency and one high Vite finding. npm proposes Vite 8.3.0 as the available remediation, but Vite 8 requires a newer Node runtime and is incompatible with the supported runtime. No forced audit fix was run. Keep the development server bound to a trusted local interface and revisit these findings if the required runtime changes.
 - A clean install emits deprecation notices from the Node-16-compatible ESLint 8 dependency tree. These are tooling lifecycle notices rather than installation failures; newer ESLint major versions require a newer runtime/tooling migration.
 
 ## Testing boundary

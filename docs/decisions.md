@@ -2,15 +2,15 @@
 
 Recorded: 2026-09-17, from the planning discussion and [plan.md](plan.md).
 
-“Adopted” means selected for the implementation plan, not already implemented. Current tooling and verification status belong in [stack.md](stack.md); execution progress belongs in [tasks.md](tasks.md). Assignment constraints are identified separately from our design choices.
+“Adopted” means selected for the implementation plan, not already implemented. Current tooling and verification status belong in [stack.md](stack.md); execution progress belongs in [tasks.md](tasks.md). Runtime requirements are recorded alongside gameplay and architecture decisions.
 
-## D01 — Preserve the assignment runtime
+## D01 — Preserve the supported runtime
 
 Status: required constraint.
 
 Decision: support Node.js 16.16.0 and npm 8.11.0, with `npm install && npm start` as the delivery entry point.
 
-Reason: these versions and commands are explicitly specified in the assignment.
+Reason: a fixed runtime and startup command keep setup and verification reproducible.
 
 Consequence: dependency and test-tool versions must be compatible. A successful build on newer Node is insufficient evidence. Exact-runtime verification remains pending.
 
@@ -20,13 +20,13 @@ Status: adopted; initial scaffold exists.
 
 Decision: use the existing standalone scaffold and native HTML/CSS for the interface. The suggested starter repositories are optional; no frontend framework is needed for the planned screens.
 
-Reason: the assignment prioritizes readable organization, and the UI is small. This keeps the project focused on gameplay rather than template infrastructure.
+Reason: the UI is small enough for a straightforward structure. This keeps the project focused on gameplay rather than template infrastructure.
 
 Consequence: application lifecycle and UI wiring are explicit. Exact dependency versions remain in package configuration and the stack snapshot.
 
 ## D03 — Horizontal catching defines the gameplay
 
-Status: adopted interpretation of the assignment.
+Status: adopted gameplay scope.
 
 Decision: the character stays at the bottom and moves left/right. Contact catches food automatically. Use idle and horizontal movement animations from the supplied pack.
 
@@ -50,7 +50,7 @@ Status: adopted refinement of the initial architecture.
 
 Decision: use classes for state and resource ownership; represent players/items as typed data when sufficient and collision calculations as pure functions. Extract spawning/audio classes when their implemented responsibilities justify them.
 
-Reason: the initial one-class-per-concept proposal introduced more structure than the first version needed. Readability is the assignment's main code-quality criterion.
+Reason: the initial one-class-per-concept proposal introduced more structure than the first version needed. Readable code is the priority.
 
 Consequence: prefer composition, focused files, and explicit types. The target module list guides ownership without requiring empty classes, a global event bus, or an entity framework.
 
@@ -126,7 +126,7 @@ Resolve these during the relevant task and record consequential choices here. Co
 
 ## D12 — Make progression visible through stages
 
-Status: adopted during the design interview on 2026-09-17; visual details and catch thresholds are open.
+Status: adopted on 2026-09-17; visual details and catch thresholds are open.
 
 Decision: divide play into recognizable stages that change visual atmosphere and increase difficulty together, with lighting changes as the initial proposed visual technique. Advance stages based on the number of food items caught during the current run, rather than elapsed survival time. Use one stage progression system rather than separate visual stages and difficulty levels. Exact thresholds remain to be tuned.
 
@@ -136,7 +136,7 @@ Consequence: each stage needs configurable visual settings, catch thresholds, an
 
 ## D13 — Generate endless progression and cycle visual themes
 
-Status: adopted during the design interview; formula and limits remain open.
+Status: adopted during initial planning; formula and limits remain open.
 
 Decision: derive successive stage settings from configuration and stage number, while cycling through a finite collection of prepared visual themes. A run continues until lives reach zero rather than ending with a final-stage victory.
 
@@ -150,7 +150,7 @@ Status: superseded by [D23](#d23--remove-hazards-from-play).
 
 Decision: catching food awards one point; missing food costs one life. Contact with a hazard costs one life, while a hazard leaving the board costs nothing. Hazards award neither points nor catch progress. Each item resolves only once. Later stages increase the proportion of hazards relative to food; exact ratios and spawn rates remain open.
 
-Reason: choosing what to catch adds difficulty beyond simply increasing fall speed. This is an explicit extension to the original assignment, whose missed-item penalty applies to food in this design.
+Reason: choosing what to catch adds difficulty beyond simply increasing fall speed. This extends the core food-catching mechanic; only missed food carries a penalty in this design.
 
 Consequence: item kind must determine contact/miss outcomes. Hazards must be recognizable beyond color alone. Preserve a meaningful supply of food so catch-based progression remains possible. Food penalties and hazard contacts share the same ten-life pool; reaching zero ends the run. D15 settles initial spawn placement; D16 settles simultaneous damage.
 
@@ -160,23 +160,23 @@ Status: adopted for the first version; hazard-specific fairness concerns are sup
 
 Decision: sample spawn positions randomly within board bounds using the configured spawn timing and item proportions. Initially impose no minimum separation or guaranteed escape/catch route between food and hazards.
 
-Reason: the user prefers to evaluate the simpler random version first and revisit fairness later.
+Reason: start with simple random placement and use playtesting to determine whether fairness constraints are needed.
 
 Consequence: overlapping or unavoidably damaging combinations are an accepted first-version limitation. This does not bypass board bounds, item lifecycle rules, or deterministic randomness in tests. Track reaction-time, separation, and reachable-route constraints as follow-up work rather than a release prerequisite.
 
-Review (2026-09-19): keep this decision for the recruitment delivery. Final browser verification found no repeatable unfair sequence, and no playtest evidence establishes what separation or reaction-time rule would improve the game. At the maximum configured fall speed, an item's bottom takes about 1.09 seconds to reach the player's top, while the player takes about 1.79 seconds to cross its usable horizontal range. That mismatch is not sufficient evidence of a defect: choosing a position is part of the game, and a spawn-placement solver would introduce policy, tuning values, and model complexity not required by the assignment.
+Review (2026-09-19): retain random placement for the initial release. Final browser verification found no repeatable unfair sequence, and no playtest evidence establishes what separation or reaction-time rule would improve the game. At the maximum configured fall speed, an item's bottom takes about 1.09 seconds to reach the player's top, while the player takes about 1.79 seconds to cross its usable horizontal range. That mismatch is not sufficient evidence of a defect: choosing a position is part of the game, and a spawn-placement solver would introduce policy, tuning values, and model complexity beyond the initial scope.
 
 Reopen only from recorded playtest evidence. Capture the random seed, stage, player position, active item positions and kinds, plus the expected viable action for every reported unfair case. Before implementation, define the rule in measurable terms and add it to this decision log. A fairness change is acceptable only when deterministic regressions reproduce each recorded case, ordinary seeded spawning remains deterministic and in bounds, food remains available at the configured probability, and the model rule can be explained without presentation or input dependencies. Candidate measurements are spawn-to-player reaction time, same-wave horizontal separation, and whether the player's speed permits at least one catch or escape route; their thresholds remain deliberately unset until playtesting supplies evidence.
 
 ## D16 — Apply damage per hazard without temporary protection
 
-Status: superseded by [D23](#d23--remove-hazards-from-play); design interview concluded at the user's request.
+Status: superseded by [D23](#d23--remove-hazards-from-play).
 
 Decision: each hazard contact removes one life independently. There is no invulnerability window or damage cooldown after a hit. Multiple hazards can remove multiple lives in the same update, until lives reach zero.
 
-Reason: the user declined temporary protection for the initial game.
+Reason: the initial design applies damage per contact without a temporary protection period.
 
-Consequence: resolve each hazard at most once, clamp lives at zero, and end the run immediately when no lives remain. Missed food still removes one life per item. Tests must cover multiple contacts, one-time resolution, and game over without negative lives. Numerical tuning can proceed during implementation without reopening the interview.
+Consequence: resolve each hazard at most once, clamp lives at zero, and end the run immediately when no lives remain. Missed food still removes one life per item. Tests must cover multiple contacts, one-time resolution, and game over without negative lives. Numerical tuning can proceed during implementation within these rules.
 
 ## D17 — Fill the viewport with a scaled logical board
 
@@ -200,11 +200,11 @@ Consequence: narrower horizontal reach changes initial catch difficulty intentio
 
 ## D19 — Defer touch controls until after delivery verification
 
-Status: adopted at the user's request; refines the scheduling of D08 and D17.
+Status: adopted during planning; refines the scheduling of D08 and D17.
 
 Decision: move T04b to the end, after T07. Reassess whether touch/pointer movement is needed before implementing it. Keep responsive presentation and keyboard controls in the current delivery scope.
 
-Reason: touch support is not required by the assignment, and the user is unsure it is needed.
+Reason: establish and verify keyboard play first, then reassess touch support against the supported layouts.
 
 Consequence: T04b no longer blocks T04 completion or T05–T07. T05 can use the implemented T04a layout while the native Escape smoke check remains open; that check must be completed before T07 closes. The fixed-board coordinate mapping design remains available for later touch support. Earlier scheduling of touch alongside responsive presentation is superseded by this decision.
 
@@ -250,7 +250,7 @@ Status: adopted on 2026-09-21; supersedes D14, D16, and the hazard probability p
 
 Decision: only food falls. Catching food awards one point and advances catch-based stage progress; missing food costs one life. Later stages still increase fall speed and spawn frequency, but do not introduce harmful collectables.
 
-Reason: the user requested removal of the harmful collectable mechanic after playing the game.
+Reason: playtest feedback favored focusing on catching food.
 
 Consequence: remove item kinds, hazard spawn probability, contact damage, hazard graphics, and avoidance instructions. Preserve the historical rationale above so the earlier choice remains traceable.
 

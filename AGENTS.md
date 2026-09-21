@@ -12,7 +12,7 @@
 ## Implementation conventions
 
 - Keep simulation code in `src/game/` independent of PixiJS and the DOM. Route presentation effects through typed gameplay events.
-- Use explicit types for variables, class attributes, parameters, and function returns, as required by the assignment. Use classes for stateful behavior and typed data/functions where they keep the code clearer.
+- Use explicit types for variables, class attributes, parameters, and function returns. Use classes for stateful behavior and typed data/functions where they keep the code clearer.
 - Create modules as their behavior is implemented. The proposed layout is a responsibility map, not a mandate to generate empty abstractions.
 - Preserve the required Node/npm compatibility. Run verification with the required executable versions; configuration declarations alone are not evidence.
 - Consult [asset sources](public/assets/SOURCES.md) when integrating or replacing graphics, and retain attribution and supplied documentation.

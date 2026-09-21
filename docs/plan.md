@@ -1,6 +1,6 @@
 # Catch Game implementation plan
 
-Status: T01–T07 and T04b complete. The delivered game includes supplied art, viewport-sized keyboard/pointer play, pause/resume, catch-based stages, bounded difficulty, hazards, and themed visual/audio feedback. Required-runtime automation and production-browser pointer verification passed; real touch hardware coverage remains unavailable.
+Status: T01–T07 and T04b complete. The delivered game includes supplied art, viewport-sized keyboard/pointer play, pause/resume, catch-based stages, bounded difficulty, and themed visual/audio feedback. Required-runtime automation and production-browser pointer verification passed; real touch hardware coverage remains unavailable. D23 removes the earlier hazard mechanic.
 
 Read [stack.md](stack.md) before choosing libraries or changing build configuration. Use [tasks.md](tasks.md) for implementation order and acceptance criteria.
 
@@ -12,8 +12,6 @@ See [decisions.md](decisions.md) for the rationale behind adopted choices and th
 - Food falls from the top. Catching an item awards one point.
 - Each missed item removes one life. A session starts with ten lives and ends at zero.
 - Each item is resolved exactly once: caught or missed.
-- Provisional extension (D14): hazards cost one life on contact and nothing when missed. They grant no points or stage progress and share the same life pool as food penalties. Later stages increase their proportion relative to food.
-- Each hazard applies its own damage with no temporary invulnerability or cooldown (D16). Multiple contacts may cost multiple lives in one update; stop at zero lives and end the run without allowing negative lives.
 - The project uses TypeScript, readable OOP, explicit variable and attribute types, and separate files for distinct responsibilities.
 - Delivery includes a Git repository and supports `npm install && npm start` on the required runtime.
 
@@ -71,7 +69,7 @@ Play is divided into stages that change visual atmosphere and increase difficult
 
 Stage catch thresholds and speeds are tuning decisions, not fixed assignment requirements. Existing items retain their original speed while new items use the new stage settings. Cap difficulty so the game remains playable.
 
-Initially sample spawn positions randomly within board bounds without fairness constraints (D15). Overlaps and unavoidable damage are accepted limitations of this version. Minimum separation, reaction time, and reachable routes are deferred follow-up work.
+Sample food spawn positions randomly within board bounds (D15). Multiple food items can overlap; each missed item costs one life. Reachability tuning remains deferred.
 
 New levels should require configuration changes. New food appearances should require manifest/configuration entries. Future special-item behavior can extend the item/event types when requested. Combat, inventory, a backend, and a general-purpose entity framework are not needed for this scope.
 

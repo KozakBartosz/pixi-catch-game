@@ -147,21 +147,16 @@ export class GameSession {
       }
 
       resolvedItemIds.add(item.id);
-      if (item.kind === 'food') {
-        this.score += 1;
-        this.caughtFood += 1;
-        events.push({
-          type: 'itemCaught',
-          itemId: item.id,
-          score: this.score,
-          x: item.x + item.width / 2,
-          y: item.y + item.height / 2,
-        });
-        this.advanceStage(events);
-      } else if (this.loseLife(item, 'hazard', events)) {
-        this.items = [];
-        return;
-      }
+      this.score += 1;
+      this.caughtFood += 1;
+      events.push({
+        type: 'itemCaught',
+        itemId: item.id,
+        score: this.score,
+        x: item.x + item.width / 2,
+        y: item.y + item.height / 2,
+      });
+      this.advanceStage(events);
     }
 
     const unresolvedItems: FallingItemState[] = [];
@@ -172,10 +167,7 @@ export class GameSession {
 
       if (item.y < this.config.boardHeight) {
         unresolvedItems.push(item);
-      } else if (
-        item.kind === 'food' &&
-        this.loseLife(item, 'missedFood', events)
-      ) {
+      } else if (this.loseLife(item, events)) {
         this.items = [];
         return;
       }
@@ -220,7 +212,6 @@ export class GameSession {
       y: -this.config.itemSize,
       width: this.config.itemSize,
       height: this.config.itemSize,
-      kind: this.random() < this.stageSettings.hazardChance ? 'hazard' : 'food',
       fallSpeed: this.stageSettings.fallSpeed,
     };
 
@@ -245,17 +236,12 @@ export class GameSession {
     });
   }
 
-  private loseLife(
-    item: FallingItemState,
-    cause: 'missedFood' | 'hazard',
-    events: GameplayEvent[],
-  ): boolean {
+  private loseLife(item: FallingItemState, events: GameplayEvent[]): boolean {
     this.lives = Math.max(0, this.lives - 1);
     events.push({
       type: 'lifeLost',
       itemId: item.id,
       lives: this.lives,
-      cause,
       x: item.x + item.width / 2,
       y: Math.min(this.config.boardHeight, item.y + item.height / 2),
     });

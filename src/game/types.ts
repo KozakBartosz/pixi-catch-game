@@ -1,5 +1,4 @@
 export type SessionState = 'ready' | 'playing' | 'paused' | 'gameOver';
-export type FallingItemKind = 'food' | 'hazard';
 
 export interface InputState {
   left: boolean;
@@ -21,7 +20,6 @@ export interface FallingItemState {
   y: number;
   width: number;
   height: number;
-  kind: FallingItemKind;
   fallSpeed: number;
 }
 
@@ -48,7 +46,6 @@ export type GameplayEvent =
       type: 'lifeLost';
       itemId: number;
       lives: number;
-      cause: 'missedFood' | 'hazard';
       x: number;
       y: number;
     }
@@ -80,9 +77,6 @@ export interface StageProgressionConfig {
   baseSpawnInterval: number;
   spawnIntervalDecrease: number;
   minimumSpawnInterval: number;
-  baseHazardChance: number;
-  hazardChanceIncrease: number;
-  maximumHazardChance: number;
   themeIds: readonly string[];
 }
 
@@ -91,5 +85,4 @@ export interface StageSettings {
   themeId: string;
   fallSpeed: number;
   spawnInterval: number;
-  hazardChance: number;
 }

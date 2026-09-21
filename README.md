@@ -1,8 +1,8 @@
 # Pixi Catch Game
 
-A small TypeScript/PixiJS game about catching falling food. Move the character along the bottom of the board, earn one point for each food item, and avoid hazards. Missing food or touching a hazard costs one of the ten lives. The run ends at zero lives.
+A small TypeScript/PixiJS game about catching falling food. Move the character along the bottom of the board and earn one point for each food item. Missing food costs one of the ten lives. The run ends at zero lives.
 
-The game uses a fixed 800 × 600 simulation board and scales its presentation to the browser viewport. Catch-based stages continue indefinitely, cycle visual themes, and gradually increase fall speed, spawn frequency, and hazard chance within documented limits.
+The game uses a fixed 800 × 600 simulation board and scales its presentation to the browser viewport. Catch-based stages continue indefinitely, cycle visual themes, and gradually increase fall speed and spawn frequency within documented limits.
 
 ## Requirements and setup
 
@@ -67,7 +67,7 @@ The model accepts injected randomness, so rule tests remain deterministic. Items
 
 ### Change or add stage behavior
 
-Edit `DEFAULT_STAGE_PROGRESSION` in [`src/game/stages.ts`](src/game/stages.ts). It controls catches per stage, speed and spawn-interval growth and caps, hazard probability and cap, and the cyclic theme identifiers. Keep stage rules independent of rendering. If a new setting changes gameplay, add it to `StageProgressionConfig` in [`src/game/types.ts`](src/game/types.ts) and cover its boundaries in [`src/game/stages.test.ts`](src/game/stages.test.ts) or [`src/game/GameSession.test.ts`](src/game/GameSession.test.ts).
+Edit `DEFAULT_STAGE_PROGRESSION` in [`src/game/stages.ts`](src/game/stages.ts). It controls catches per stage, speed and spawn-interval growth and caps, and the cyclic theme identifiers. Keep stage rules independent of rendering. If a new setting changes gameplay, add it to `StageProgressionConfig` in [`src/game/types.ts`](src/game/types.ts) and cover its boundaries in [`src/game/stages.test.ts`](src/game/stages.test.ts) or [`src/game/GameSession.test.ts`](src/game/GameSession.test.ts).
 
 Theme identifiers currently select presentation tinting in [`src/rendering/GameView.ts`](src/rendering/GameView.ts). Add a visual theme there without coupling the simulation to PixiJS.
 

@@ -14,7 +14,7 @@ describe('stage progression', (): void => {
     expect(getStageNumber(10, DEFAULT_STAGE_PROGRESSION)).toBe(3);
   });
 
-  it('caps every difficulty parameter while keeping food available', (): void => {
+  it('caps fall speed and spawn frequency', (): void => {
     const stage: StageSettings = getStageSettings(
       1000,
       DEFAULT_STAGE_PROGRESSION,
@@ -23,7 +23,6 @@ describe('stage progression', (): void => {
       number: 1000,
       fallSpeed: 420,
       spawnInterval: 0.4,
-      hazardChance: 0.35,
     });
   });
 
@@ -36,6 +35,5 @@ describe('stage progression', (): void => {
     expect(wrapped.themeId).toBe(first.themeId);
     expect(wrapped.fallSpeed).toBeGreaterThan(first.fallSpeed);
     expect(wrapped.spawnInterval).toBeLessThan(first.spawnInterval);
-    expect(wrapped.hazardChance).toBeGreaterThan(first.hazardChance);
   });
 });

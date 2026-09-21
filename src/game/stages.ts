@@ -3,14 +3,11 @@ import { StageProgressionConfig, StageSettings } from './types';
 export const DEFAULT_STAGE_PROGRESSION: StageProgressionConfig = {
   catchesPerStage: 5,
   baseFallSpeed: 210,
-  fallSpeedIncrease: 30,
+  fallSpeedIncrease: 10,
   maximumFallSpeed: 420,
   baseSpawnInterval: 0.8,
   spawnIntervalDecrease: 0.05,
   minimumSpawnInterval: 0.4,
-  baseHazardChance: 0,
-  hazardChanceIncrease: 0.05,
-  maximumHazardChance: 0.35,
   themeIds: ['midnight', 'sunset', 'aurora'],
 };
 
@@ -35,10 +32,6 @@ export const getStageSettings: (
     spawnInterval: Math.max(
       config.minimumSpawnInterval,
       config.baseSpawnInterval - difficultyStep * config.spawnIntervalDecrease,
-    ),
-    hazardChance: Math.min(
-      config.maximumHazardChance,
-      config.baseHazardChance + difficultyStep * config.hazardChanceIncrease,
     ),
   };
 };

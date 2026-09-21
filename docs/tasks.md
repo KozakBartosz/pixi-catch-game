@@ -274,3 +274,14 @@ Reviewer verification (2026-09-19):
 - On Node `16.16.0` / npm `8.11.0`, `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm test` (40 tests in 8 suites), and `npm run build` passed. The production build transformed 474 modules.
 - Production-browser pointer press/drag moved the player through the speed-limited model path; releasing stopped target movement. HTML controls remained separate from canvas movement and the console stayed clean.
 - Deterministic tests cover pointer cancellation, capture loss, window blur, live resize mapping, board-margin rejection and edge clamping. Real touch hardware and an orientation change during a held drag were unavailable in the verification environment. This is a remaining device-coverage limitation, not a blocker for T04b.
+
+## T08 — Remove harmful collectables
+
+Requested 2026-09-21. Remove hazards from spawning, simulation types and rules, graphics, stage configuration, and start instructions. Preserve food scoring, missed-food penalties, and stage difficulty through speed and spawn frequency. D23 records the changed gameplay decision.
+
+Verification (2026-09-21):
+
+- Removed the hazard item kind, spawn probability and tuning, contact damage, and Pixi hazard drawing. Every spawned item now uses the food sprite and the same catch/miss rules.
+- Updated the start instructions, README, context, plan, and decision log. Historical T05 and D14–D20 records remain traceable; D23 supersedes the hazard rules.
+- On Node `16.16.0` / npm `8.11.0`, typecheck, lint, format check, Jest (49 tests in ten suites), and production build passed. `git diff --check` passed.
+- Development-browser check showed the new start instructions and successful transition into play with the food-only rendering path. Real touch hardware was not available for this change; pointer behavior itself was not modified.

@@ -232,10 +232,7 @@ export class GameView {
     let sprite: DisplayObject | undefined = this.itemSprites.get(item.id);
 
     if (!sprite) {
-      sprite =
-        item.kind === 'hazard'
-          ? this.createHazard(item)
-          : this.createFood(item);
+      sprite = this.createFood(item);
       this.itemSprites.set(item.id, sprite);
       this.world.addChild(sprite);
     }
@@ -250,38 +247,6 @@ export class GameView {
     sprite.width = item.width;
     sprite.height = item.height;
     return sprite;
-  }
-
-  private createHazard(item: FallingItemState): Graphics {
-    const hazard: Graphics = new Graphics();
-    const center: number = item.width / 2;
-    hazard.lineStyle(3, 0xfef2f2);
-    hazard.beginFill(0xdc2626);
-    hazard.drawPolygon([
-      center,
-      0,
-      item.width * 0.64,
-      item.height * 0.3,
-      item.width,
-      center,
-      item.width * 0.64,
-      item.height * 0.7,
-      center,
-      item.height,
-      item.width * 0.36,
-      item.height * 0.7,
-      0,
-      center,
-      item.width * 0.36,
-      item.height * 0.3,
-    ]);
-    hazard.endFill();
-    hazard.lineStyle(4, 0xfef2f2);
-    hazard.moveTo(item.width * 0.32, item.height * 0.32);
-    hazard.lineTo(item.width * 0.68, item.height * 0.68);
-    hazard.moveTo(item.width * 0.68, item.height * 0.32);
-    hazard.lineTo(item.width * 0.32, item.height * 0.68);
-    return hazard;
   }
 
   private renderPlayer(snapshot: SessionSnapshot): void {

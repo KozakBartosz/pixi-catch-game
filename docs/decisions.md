@@ -116,13 +116,13 @@ Consequence: test-tool selection remains part of environment setup. Record actua
 
 ## Open choices
 
-- Further playtesting of stage catch thresholds, difficulty and hazard share; initial values are adopted in D20.
+- Further playtesting of stage catch thresholds and difficulty; initial values are adopted in D20.
 
 - Logical board dimensions, hitbox sizes, collision algorithm, and initial balance values.
 - Specific food selection, background treatment, audio source, and touch interaction.
 - Remote repository destination; standalone local Git setup is still pending.
 
-Resolve these during the relevant task and record consequential choices here. Combat remains outside scope; hazards are provisionally included by D14.
+Resolve these during the relevant task and record consequential choices here. Combat remains outside scope; D23 supersedes the provisional hazard mechanic in D14.
 
 ## D12 — Make progression visible through stages
 
@@ -146,7 +146,7 @@ Consequence: theme selection wraps independently of the stage number; wrapping a
 
 ## D14 — Add avoidable hazards alongside food
 
-Status: provisional, accepted for playtesting; revise if the mechanic does not feel right.
+Status: superseded by [D23](#d23--remove-hazards-from-play).
 
 Decision: catching food awards one point; missing food costs one life. Contact with a hazard costs one life, while a hazard leaving the board costs nothing. Hazards award neither points nor catch progress. Each item resolves only once. Later stages increase the proportion of hazards relative to food; exact ratios and spawn rates remain open.
 
@@ -156,7 +156,7 @@ Consequence: item kind must determine contact/miss outcomes. Hazards must be rec
 
 ## D15 — Start with random spawn placement; defer fairness constraints
 
-Status: adopted for the first version; fairness improvements explicitly deferred.
+Status: adopted for the first version; hazard-specific fairness concerns are superseded by [D23](#d23--remove-hazards-from-play).
 
 Decision: sample spawn positions randomly within board bounds using the configured spawn timing and item proportions. Initially impose no minimum separation or guaranteed escape/catch route between food and hazards.
 
@@ -170,7 +170,7 @@ Reopen only from recorded playtest evidence. Capture the random seed, stage, pla
 
 ## D16 — Apply damage per hazard without temporary protection
 
-Status: adopted; design interview concluded at the user's request.
+Status: superseded by [D23](#d23--remove-hazards-from-play); design interview concluded at the user's request.
 
 Decision: each hazard contact removes one life independently. There is no invulnerability window or damage cooldown after a hit. Multiple hazards can remove multiple lives in the same update, until lives reach zero.
 
@@ -214,7 +214,7 @@ Reason: this keeps browser geometry at the input boundary and gameplay motion in
 
 ## D20 — Initial stage tuning and explicit pause/resume
 
-Status: adopted for T05; values remain subject to playtesting.
+Status: adopted for T05; values remain subject to playtesting. The hazard probability portion is superseded by [D23](#d23--remove-hazards-from-play).
 
 Decision: advance one stage every 5 food catches. Starting from stage 1, use fall speed `min(420, 210 + 30 * (stage - 1))`, spawn interval `max(0.4, 0.8 - 0.05 * (stage - 1))` seconds, and hazard probability `min(0.35, 0.05 * (stage - 1))`. Cycle theme identifiers `midnight`, `sunset`, `aurora`; visual theme treatment remains T06. Each item stores its spawn-time fall speed. A running spawn countdown is retained across a stage change; subsequent intervals use the current stage.
 
@@ -243,3 +243,13 @@ Decision: `GameUI` receives its DOM root and a typed object of named actions. It
 Reason: named wiring makes application actions explicit; scoped lookup prevents accidental binding to unrelated page elements. Transition-based focus keeps keyboard users on visible controls without interrupting each animation frame.
 
 Consequence: this does not change Q01's single-application ownership of Pixi's global asset cache. Structural accessibility checks are distinct from testing with a real screen reader.
+
+## D23 — Remove hazards from play
+
+Status: adopted on 2026-09-21; supersedes D14, D16, and the hazard probability portion of D20.
+
+Decision: only food falls. Catching food awards one point and advances catch-based stage progress; missing food costs one life. Later stages still increase fall speed and spawn frequency, but do not introduce harmful collectables.
+
+Reason: the user requested removal of the harmful collectable mechanic after playing the game.
+
+Consequence: remove item kinds, hazard spawn probability, contact damage, hazard graphics, and avoidance instructions. Preserve the historical rationale above so the earlier choice remains traceable.

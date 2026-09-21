@@ -52,6 +52,7 @@ const ids: string[] = [
   'fullscreen-button',
   'fullscreen-status',
   'mute-button',
+  'damage-flash',
 ];
 
 function setup(): {
@@ -88,6 +89,21 @@ function snapshot(
 }
 
 describe('GameUI', (): void => {
+  it('shows a viewport flash for a lost life, then expires and resets it', (): void => {
+    const { ui, elements } = setup();
+    const flash: FakeElement = elements.get('damage-flash') as FakeElement;
+    flash.hidden = true;
+    ui.showDamageFlash();
+    expect(flash.hidden).toBe(false);
+    ui.advanceDamageFlash(0.1);
+    expect(flash.hidden).toBe(false);
+    ui.advanceDamageFlash(0.1);
+    expect(flash.hidden).toBe(true);
+    ui.showDamageFlash();
+    ui.clearDamageFlash();
+    expect(flash.hidden).toBe(true);
+  });
+
   it('writes HUD text only for changed values', (): void => {
     const { ui, elements } = setup();
     const get: (id: string) => FakeElement = (id: string): FakeElement =>

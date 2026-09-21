@@ -91,6 +91,12 @@ describe('GameApp pause integration', (): void => {
         left: false,
         right: false,
       });
+      updateSpy.mockReturnValueOnce([
+        { type: 'lifeLost', itemId: 1, lives: 9, x: 400, y: 600 },
+      ]);
+      tick();
+      expect(GameUI.prototype.showDamageFlash).toHaveBeenCalledTimes(1);
+      expect(GameUI.prototype.advanceDamageFlash).toHaveBeenCalled();
       page.hidden = true;
       page.dispatchEvent(new Event('visibilitychange'));
       expect(pauseSpy).toHaveBeenCalledTimes(1);

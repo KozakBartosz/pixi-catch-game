@@ -289,3 +289,13 @@ Status: adopted on 2026-09-21 after further playtesting; refines D26's timing.
 Decision: shorten acceleration to 0.16 seconds and braking to 0.08 seconds. Integrate the exact time spent accelerating or braking within each simulation step, so distance does not depend on frame boundaries. Keep maximum speed and food spacing unchanged.
 
 Reason: movement still felt slightly too heavy after D26.
+
+## D28 — Show life-loss flash across the viewport
+
+Status: adopted on 2026-09-21 after UI feedback.
+
+Decision: render the brief red life-loss flash as a non-interactive HTML layer covering the game root, while keeping board-local catch effects in PixiJS. Drive its timer from the same active-play update loop; pause freezes it, and restart or game over clears it.
+
+Reason: the former 800 × 600 PixiJS rectangle was transformed with the contain-fitted board, leaving the surrounding viewport unflashed on screens with different aspect ratios.
+
+Consequence: `GameApp` routes resolved life-loss events to `GameUI`; gameplay rules remain independent of rendering.

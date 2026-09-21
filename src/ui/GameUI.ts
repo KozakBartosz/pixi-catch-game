@@ -41,6 +41,8 @@ export class GameUI {
   private readonly fullscreenButton: HTMLButtonElement;
   private readonly fullscreenStatus: HTMLElement;
   private readonly muteButton: HTMLButtonElement;
+  private readonly damageFlash: HTMLElement;
+  private damageFlashSeconds: number = 0;
   private readonly handleStart: () => void;
   private readonly handleRestart: () => void;
   private readonly handleRetry: () => void;
@@ -76,6 +78,7 @@ export class GameUI {
     this.fullscreenStatus =
       this.requireElement<HTMLElement>('#fullscreen-status');
     this.muteButton = this.requireElement<HTMLButtonElement>('#mute-button');
+    this.damageFlash = this.requireElement<HTMLElement>('#damage-flash');
     this.handleStart = actions.start;
     this.handleRestart = actions.restart;
     this.handleRetry = actions.retry;
@@ -166,6 +169,24 @@ export class GameUI {
   public setMuted(muted: boolean): void {
     this.muteButton.textContent = muted ? 'Sound off' : 'Sound on';
     this.muteButton.setAttribute('aria-pressed', String(muted));
+  }
+
+  public showDamageFlash(): void {
+    this.damageFlashSeconds = 0.18;
+    this.damageFlash.hidden = false;
+  }
+
+  public advanceDamageFlash(dtSeconds: number): void {
+    this.damageFlashSeconds = Math.max(
+      0,
+      this.damageFlashSeconds - Math.min(Math.max(dtSeconds, 0), 0.1),
+    );
+    if (this.damageFlashSeconds === 0) this.damageFlash.hidden = true;
+  }
+
+  public clearDamageFlash(): void {
+    this.damageFlashSeconds = 0;
+    this.damageFlash.hidden = true;
   }
 
   public dispose(): void {

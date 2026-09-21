@@ -35,7 +35,6 @@ export class GameView {
   private readonly world: Container;
   private readonly assets: LoadedGameAssets;
   private readonly effects: Container;
-  private readonly damageFlash: Graphics;
   private readonly themeOverlay: Graphics;
   private readonly reducedMotion: boolean;
   private readonly crossfadeBackground: Sprite;
@@ -50,7 +49,6 @@ export class GameView {
   private playerAnimation: 'idle' | 'left' | 'right' = 'idle';
   private lastFacing: 'left' | 'right' = 'right';
   private readonly timedEffects: TimedEffect[] = [];
-  private damageFlashSeconds: number = 0;
   private backgroundElapsedSeconds: number = 0;
   private currentThemeTint: number = THEME_TINTS.midnight;
   private targetThemeTint: number = THEME_TINTS.midnight;
@@ -65,7 +63,6 @@ export class GameView {
     this.reducedMotion = reducedMotion;
     this.world = new Container();
     this.effects = new Container();
-    this.damageFlash = new Graphics();
     this.themeOverlay = new Graphics();
     this.playerSprite = new AnimatedSprite([this.assets.playerIdleRight]);
     const dayBackground: Sprite = this.createBackground(
@@ -77,10 +74,6 @@ export class GameView {
     this.nightBackground = this.createBackground(this.assets.backgroundNight);
     this.crossfadeBackground.alpha = 0;
     this.nightBackground.alpha = 0;
-    this.damageFlash.beginFill(0xef4444);
-    this.damageFlash.drawRect(0, 0, 800, 600);
-    this.damageFlash.endFill();
-    this.damageFlash.alpha = 0;
     this.themeOverlay.beginFill(0xffffff);
     this.themeOverlay.drawRect(0, 0, 800, 600);
     this.themeOverlay.endFill();
@@ -96,7 +89,6 @@ export class GameView {
       this.themeOverlay,
       this.playerSprite,
       this.effects,
-      this.damageFlash,
     );
     this.app.stage.addChild(this.world);
   }
@@ -127,7 +119,6 @@ export class GameView {
   public handleEvents(events: readonly GameplayEvent[]): void {
     for (const event of events) {
       if (event.type === 'itemCaught') this.addCatchEffect(event.x, event.y);
-      else if (event.type === 'lifeLost') this.damageFlashSeconds = 0.18;
     }
   }
 
@@ -149,8 +140,6 @@ export class GameView {
         this.timedEffects.splice(index, 1);
       }
     }
-    this.damageFlashSeconds = Math.max(0, this.damageFlashSeconds - step);
-    this.damageFlash.alpha = this.damageFlashSeconds > 0 ? 0.2 : 0;
   }
 
   public resetFeedback(): void {
@@ -159,8 +148,6 @@ export class GameView {
       effect.display.destroy();
     }
     this.timedEffects.length = 0;
-    this.damageFlashSeconds = 0;
-    this.damageFlash.alpha = 0;
   }
 
   public render(snapshot: SessionSnapshot): void {

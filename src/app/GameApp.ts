@@ -161,6 +161,7 @@ export class GameApp {
     void this.audio.unlock();
     this.input.clear();
     this.view.resetFeedback();
+    this.ui.clearDamageFlash();
     this.view.resetBackground();
     this.render();
   }
@@ -176,6 +177,7 @@ export class GameApp {
     void this.audio.unlock();
     this.input.clear();
     this.view.resetFeedback();
+    this.ui.clearDamageFlash();
     this.view.resetBackground();
     this.render();
   }
@@ -202,9 +204,18 @@ export class GameApp {
 
     this.audio.handle(events);
     this.view?.handleEvents(events);
+    if (
+      snapshot.state === 'playing' &&
+      events.some((event: GameplayEvent): boolean => event.type === 'lifeLost')
+    ) {
+      this.ui.showDamageFlash();
+    }
     if (snapshot.state === 'playing') {
       this.view?.advanceBackground(dtSeconds);
       this.view?.advanceEffects(dtSeconds);
+      this.ui.advanceDamageFlash(dtSeconds);
+    } else if (snapshot.state === 'gameOver') {
+      this.ui.clearDamageFlash();
     }
 
     if (events.length > 0 || snapshot.state === 'playing') {

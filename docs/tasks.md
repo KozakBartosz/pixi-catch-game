@@ -325,3 +325,10 @@ Verification: all 53 tests in ten suites, typecheck, lint, format check, product
 
 - Added `P` and `Escape` to toggle pause/resume during an active run. Held-key repeats and modified shortcuts are ignored; `Escape` remains available to the browser for native fullscreen exit. The listener is removed on disposal.
 - Browser check confirmed `P` pauses and `Escape` resumes and pauses again. Automated verification: 54 tests, typecheck, lint, format check, build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required Node 16.16.0/npm 8.11.0 remains unverified in this environment.
+
+## T13 — Full-viewport life-loss flash
+
+- [x] Move the brief red flash from the contain-fitted PixiJS board to a non-interactive HTML layer covering the game root (D28).
+- [x] Keep event-triggered timing, pause freeze, and restart/game-over cleanup.
+
+Verification (2026-09-21): The pre-fix UI regression test failed because no viewport flash API existed. After the fix, focused UI/application tests passed; browser DOM inspection confirmed the layer is positioned against the viewport-sized game root. Full suite, typecheck, lint, format check, build, and `git diff --check` passed on local Node 24.20.0/npm 11.19.0. Required Node 16.16.0/npm 8.11.0 and a timed visual capture of the 0.18-second flash remain unverified.

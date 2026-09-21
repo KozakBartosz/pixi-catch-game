@@ -21,6 +21,8 @@ The supplied character pack contains more animations than this game needs. Use l
 
 Keep gameplay independent of PixiJS and the DOM. The application coordinates model updates, rendering, input, and HTML UI.
 
+Viewport-wide feedback such as the life-loss flash belongs to the HTML overlay; board-local effects remain in PixiJS (D28).
+
 | Module | Responsibility |
 | --- | --- |
 | `app/GameApp.ts` | Create dependencies, load assets, own one update loop, connect UI actions, and dispose resources. |
